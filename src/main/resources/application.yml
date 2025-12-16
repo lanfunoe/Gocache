@@ -1,0 +1,40 @@
+server:
+  port: 6521
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: gocache
+  codec:
+    max-in-memory-size: 128MB
+
+# API配置
+gocache:
+  api:
+    platform: "lite"
+    user-agent: "Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi"
+
+# Micrometer Tracing 配置
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # 100% 采样率（生产环境可调低）
+    propagation:
+      type: []
+
+# 日志配置
+logging:
+  level:
+    com.lanfunoe.gocache: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{traceId:-no-trace},%X{spanId:-no-span}] %msg%n"
+  include-application-name: false
+  file:
+    path: src/main/resources/logs
+    name: src/main/resources/logs/app.log
+  logback:
+    rollingpolicy:
+      max-file-size: 400KB
+      max-history: 7
+      total-size-cap: 4MB
