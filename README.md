@@ -49,18 +49,6 @@ mvn spring-boot:run
 服务启动后访问 `http://localhost:6521`
 
 
-
-
-### 搜索音乐
-
-```bash
-# 搜索歌曲
-curl -X GET "http://localhost:6521/search?keyword=周杰伦&page=1"
-
-# 搜索歌词
-curl -X GET "http://localhost:6521/search/lyric?keyword=晴天"
-```
-
 ## 📊 API 实现状态
 
 ### ✅ 已迁移且验证的功能
