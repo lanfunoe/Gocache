@@ -77,21 +77,23 @@ public abstract class BaseController {
      */
     private Mono<ResponseEntity<Map<String, Object>>> handleException(Throwable e) {
         Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("data", null);
+        errorResponse.put("status", 0);
 
         if (e instanceof WebExchangeBindException bindEx) {
             Map<String, String> errors = new HashMap<>();
             bindEx.getFieldErrors().forEach(fieldError ->
                 errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
-            errorResponse.put("code", 400);
+            errorResponse.put("error_code", 400);
             errorResponse.put("msg", "参数验证失败");
             errorResponse.put("errors", errors);
             return Mono.just(ResponseEntity.badRequest().body(errorResponse));
         } else if (e instanceof BusinessException bizEx) {
-            errorResponse.put("code", bizEx.getCode());
+            errorResponse.put("error_code", bizEx.getCode());
             errorResponse.put("msg", bizEx.getMessage());
             return Mono.just(ResponseEntity.status(bizEx.getHttpStatus()).body(errorResponse));
         } else {
-            errorResponse.put("code", 500);
+            errorResponse.put("error_code", 500);
             errorResponse.put("msg", "服务器内部错误");
             return Mono.just(ResponseEntity.internalServerError().body(errorResponse));
         }
