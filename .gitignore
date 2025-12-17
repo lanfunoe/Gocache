@@ -15,6 +15,7 @@ out/
 
 # Logs
 *.log
+*.log.*.gz
 
 # OS
 .DS_Store
