@@ -21,6 +21,11 @@ public class Singer extends BaseEntity {
     private String singername;
 
     /**
+     * 拼音首字母
+     */
+    private String pinyinInitial;
+
+    /**
      * 歌手头像URL
      */
     private String avatar;
@@ -31,14 +36,44 @@ public class Singer extends BaseEntity {
     private Integer gender;
 
     /**
+     * 生日
+     */
+    private String birthday;
+
+    /**
      * 国家
      */
     private String country;
 
     /**
+     * 地区ID
+     */
+    private String areaId;
+
+    /**
+     * 语言
+     */
+    private String language;
+
+    /**
      * 歌手简介
      */
     private String intro;
+
+    /**
+     * 详细介绍（JSON格式）
+     */
+    private String longIntro;
+
+    /**
+     * 身份标识
+     */
+    private Integer identity;
+
+    /**
+     * 是否发布
+     */
+    private Integer isPublish;
 
     /**
      * 粉丝数量
@@ -54,4 +89,14 @@ public class Singer extends BaseEntity {
      * 专辑数量
      */
     private Integer albumCount;
+
+    /**
+     * MV数量
+     */
+    private Integer mvCount;
+
+    /**
+     * 用户状态
+     */
+    private Integer userStatus;
 }

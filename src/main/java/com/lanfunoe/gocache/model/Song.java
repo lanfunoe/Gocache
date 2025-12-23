@@ -13,12 +13,12 @@ import java.util.List;
 public class Song extends BaseEntity {
 
     /**
-     * 歌曲Hash（主键）
+     * 歌曲Hash（复合主键之一）
      */
     private String hash;
 
     /**
-     * 音频ID
+     * 音频ID（复合主键之一）
      */
     private Long audioId;
 
@@ -38,24 +38,24 @@ public class Song extends BaseEntity {
     private Integer duration;
 
     /**
-     * 文件大小（字节）
-     */
-    private Long filesize;
-
-    /**
-     * 比特率
-     */
-    private Integer bitrate;
-
-    /**
-     * 文件类型
-     */
-    private String filetype;
-
-    /**
-     * 专辑ID（外键）
+     * 专辑ID
      */
     private Long albumId;
+
+    /**
+     * 语言
+     */
+    private String language;
+
+    /**
+     * 流派
+     */
+    private String genre;
+
+    /**
+     * 发布日期
+     */
+    private String publishDate;
 
     /**
      * 播放次数
@@ -98,4 +98,9 @@ public class Song extends BaseEntity {
      * 关联的歌手ID列表
      */
     private transient List<Long> singerIds;
+
+    /**
+     * 关联的音质版本列表
+     */
+    private transient List<SongQuality> qualities;
 }

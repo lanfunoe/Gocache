@@ -26,9 +26,19 @@ public class Playlist extends BaseEntity {
     private String imgurl;
 
     /**
+     * 灵活封面
+     */
+    private String flexibleCover;
+
+    /**
      * 歌单简介
      */
     private String intro;
+
+    /**
+     * 标签（逗号分隔）
+     */
+    private String tags;
 
     /**
      * 歌曲数量
@@ -41,19 +51,29 @@ public class Playlist extends BaseEntity {
     private Long playcount;
 
     /**
+     * 收藏次数
+     */
+    private Integer collectcount;
+
+    /**
      * 分享次数
      */
     private Integer shareCount;
 
     /**
-     * 创建者用户ID（外键）
+     * 创建者用户ID
      */
     private Long userid;
 
     /**
-     * 创建者昵称（冗余字段）
+     * 创建者昵称
      */
     private String nickname;
+
+    /**
+     * 创建者头像
+     */
+    private String userPic;
 
     /**
      * 歌单类型
@@ -61,12 +81,47 @@ public class Playlist extends BaseEntity {
     private Integer ptype;
 
     /**
+     * 类型
+     */
+    private Integer type;
+
+    /**
      * 是否全局
      */
     private Integer isglobal;
 
     /**
-     * 创建时间戳
+     * 是否发布
      */
-    private Long dateline;
+    private Integer isPublish;
+
+    /**
+     * 是否精选
+     */
+    private Integer isFeatured;
+
+    /**
+     * 是否私有
+     */
+    private Integer isPri;
+
+    /**
+     * 全局收藏ID
+     */
+    private String globalCollectionId;
+
+    /**
+     * 发布日期
+     */
+    private String publishDate;
+
+    /**
+     * 创建时间
+     */
+    private Long createTime;
+
+    /**
+     * 更新时间
+     */
+    private Long updateTime;
 }

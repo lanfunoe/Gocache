@@ -34,4 +34,24 @@ public class Album extends BaseEntity {
      * 发布日期
      */
     private String publishDate;
+
+    /**
+     * 是否发布
+     */
+    private Integer publish;
+
+    /**
+     * 歌曲数量
+     */
+    private Integer songCount;
+
+    /**
+     * 语言
+     */
+    private String language;
+
+    /**
+     * 流派
+     */
+    private String genre;
 }

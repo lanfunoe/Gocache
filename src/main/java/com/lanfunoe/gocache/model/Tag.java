@@ -21,9 +21,14 @@ public class Tag extends BaseEntity {
     private String tagname;
 
     /**
-     * 父级标签ID（自关联外键）
+     * 父级标签ID（自关联）
      */
     private Long parentid;
+
+    /**
+     * 排序
+     */
+    private Integer sort;
 
     /**
      * 是否热门
