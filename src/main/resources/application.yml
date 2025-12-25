@@ -79,6 +79,9 @@ cache:
     enabled: true
     path: ${user.home}/.gocache/media
     lyrics-path: ${user.home}/.gocache/lyrics
+    image:
+      enabled: false
+      max-size: 0
     max-size: 1073741824000  # 1000GB in bytes
     cleanup-threshold: 0.9
     cleanup-target: 0.7
@@ -107,8 +110,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{traceId:-no-trace},%X{spanId:-no-span}] %msg%n"
   include-application-name: false
   file:
-    path: src/main/resources/logs
-    name: src/main/resources/logs/app.log
+    name: ${user.home}/.gocache/logs/app.log
   logback:
     rollingpolicy:
       max-file-size: 400KB

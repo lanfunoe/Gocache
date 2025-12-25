@@ -1,11 +1,11 @@
 # Gocache
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Maven](https://img.shields.io/badge/Maven-3.6+-red.svg)](https://maven.apache.org/)
 
-> 🚀 Gocache 是对 [KuGouMusicApi](https://github.com/MakcRe/KuGouMusicApi) 的 Java Spring Boot 实现，提供了完整的酷狗音乐平台 API 访问能力。项目采用响应式编程范式，并计划内置多级缓存机制以提升响应速度。
+> 🚀 Gocache 是对 [KuGouMusicApi](https://github.com/MakcRe/KuGouMusicApi) 的 Java Spring Boot 实现，采用 Spring WebFlux 的响应式编程范式，并内置三层缓存（Caffeine + SQLite + 本地文件）以提升热点接口与媒体访问速度。
 
 
 
@@ -29,6 +29,9 @@
     - 缓存统计和监控
     - 存储空间动态配置
     - 手动清理和 LRU 淘汰
+- **图片缓存（可选）**
+    - 通过配置开启后，将响应中的上游图片链接改写为本地 `/media/image/{hash}`
+    - 同时触发后台异步下载与本地缓存（空间上限可配置/可通过接口动态修改）
 
 ## 🗄️ 缓存架构
 
@@ -42,21 +45,23 @@ L1: Caffeine (In-Memory)  →  L2: SQLite (Persistent)  →  L3: Local Files (Me
 
 | 数据类型 | 缓存层级 | TTL | 存储位置 |
 |---------|---------|-----|---------|
-| 歌词 | L1 + L2 | 永久 (LRU) | SQLite |
-| 图片 | L3 | 永久 | 本地文件 |
-| 歌曲 | L3 | 永久 (LRU) | 本地文件 |
+| 歌词 | L1 + L2 | L1：12h（访问续期）；L2：持久化 | SQLite |
+| 图片 | L3（可选） | 取决于存储配置 | 本地文件 |
+| 歌曲 | L3 | 取决于存储配置 | 本地文件 |
 | 歌手信息 | L1 + L2 | 7 天 | SQLite |
 | 分类信息 | L1 + L2 | 24 小时 | SQLite |
+| 歌单标签 | L1 + L2 | 24 小时 | SQLite |
 | 歌单详情 | L1 | 2 小时 | 仅内存 |
 | 热搜 | L1 | 30 分钟 | 仅内存 |
 | 搜索结果 | L1 | 5 分钟 | 仅内存 |
 | 用户信息 | L1 | 1 小时 | 仅内存 |
+| 歌手作品 | L1 | 2 小时 | 仅内存 |
 
 ## 📋 计划中的功能
 
-- [ ] 🚀 响应缓存，提升接口响应速度
-- [ ] 📈 性能监控指标
-- [ ] 迁移剩余 api
+- [ ] 📈 补齐更多监控指标/面板（Actuator/Metrics）
+- [ ] ✅ 增加单元测试与契约测试
+- [ ] 🚧 迁移剩余 API
 
 
 ## 🚀 快速开始
@@ -165,7 +170,7 @@ mvn spring-boot:run
 | 技术 | 版本 | 说明 |
 |------|------|------|
 | Java | 21 | LTS 版本 |
-| Spring Boot | 3.4.1 | 应用框架 |
+| Spring Boot | 3.5.3 | 应用框架 |
 | WebFlux | - | 响应式 Web 框架 |
 | Micrometer Tracing | - | 分布式追踪 |
 | BouncyCastle | 1.78.1 | 加密库 |
@@ -189,6 +194,13 @@ src/main/java/com/lanfunoe/gocache/
 │   ├── LoginController.java
 │   ├── UserController.java
 │   ├── ArtistController.java
+│   ├── SongController.java
+│   ├── PlaylistController.java
+│   ├── RankController.java
+│   ├── TopController.java
+│   ├── CacheController.java
+│   ├── StorageController.java
+│   ├── MediaController.java
 │   └── ...
 ├── service/         # 业务逻辑层
 │   ├── auth/        # 认证服务
@@ -197,7 +209,9 @@ src/main/java/com/lanfunoe/gocache/
 │   ├── lyrics/      # 歌词服务
 │   ├── search/      # 搜索服务
 │   ├── playlist/    # 歌单服务
+│   ├── storage/     # 媒体文件存储/下载
 │   └── cache/       # 缓存服务
+├── repository/      # SQLite 持久化仓储层
 ├── filter/          # WebFlux 过滤器
 ├── util/            # 工具类
 ├── model/           # 数据模型
@@ -212,7 +226,7 @@ src/main/java/com/lanfunoe/gocache/
 
 ## 📝 更新日志
 
-### v0.0.1 (2024-12-16)
+### v0.0.1 (2025-12-16)
 - ✨ 初始版本发布
 - ✅ 实现 23 个核心 API
 - ✅ 支持二维码登录
@@ -241,4 +255,3 @@ src/main/java/com/lanfunoe/gocache/
 ## 📄 License
 
 本项目采用 [MIT License](LICENSE) 开源协议。
-
