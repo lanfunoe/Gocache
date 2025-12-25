@@ -138,9 +138,10 @@ public class CookieUtils {
         if (cookieToken != null) {
             return cookieToken;
         }
+        String token = extractTokenFromAuthorization(request);
 
         // 如果Cookie中没有，尝试从Authorization头中提取
-        return extractTokenFromAuthorization(request);
+        return token == null ? "" : token;
     }
 
     /**
@@ -155,8 +156,8 @@ public class CookieUtils {
         if (cookieUserid != null) {
             return cookieUserid;
         }
-
+        String userId = extractUserIdFromAuthorization(request);
         // 如果Cookie中没有，尝试从Authorization头中提取
-        return extractUserIdFromAuthorization(request);
+        return userId == null ? "0" : userId;
     }
 }

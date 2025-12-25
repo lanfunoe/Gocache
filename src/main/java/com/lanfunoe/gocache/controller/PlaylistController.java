@@ -2,9 +2,11 @@ package com.lanfunoe.gocache.controller;
 
 import com.lanfunoe.gocache.exception.BusinessException;
 import com.lanfunoe.gocache.service.playlist.PlaylistService;
+import com.lanfunoe.gocache.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -254,10 +256,11 @@ public class PlaylistController extends BaseController {
      */
     @GetMapping("/tags")
     public Mono<ResponseEntity<Map<String, Object>>> getPlaylistTags(
-            @RequestHeader(value = "Cookie", required = false) String cookie) {
+            @RequestHeader(value = "Cookie", required = false) String cookie,
+            ServerHttpRequest request) {
 
-        return handleOperation("获取歌单分类标签",
-                playlistService.getPlaylistTags(cookie),
+        return handleBoxOperation("获取歌单分类标签",
+                playlistService.getPlaylistTags(CookieUtils.extractUserIdCompatible(request), CookieUtils.extractTokenCompatible(request)),
                 cookie != null ? "with_cookie" : "no_cookie");
     }
 }

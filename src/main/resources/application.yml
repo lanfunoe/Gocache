@@ -1,18 +1,94 @@
 server:
-  port: 6521
+  port: 6522
   servlet:
     context-path: /
 spring:
   application:
     name: gocache
-  codec:
-    max-in-memory-size: 128MB
+  http:
+    codecs:
+      max-in-memory-size: 256MB
 
 # API配置
 gocache:
   api:
     platform: "lite"
     user-agent: "Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi"
+
+# 缓存配置
+cache:
+  enabled: true
+  # Caffeine内存缓存配置
+  caffeine:
+    default-max-size: 1000
+    default-expire-after-write: 1h
+    specs:
+      # 歌词缓存 - L1+L2, 永久(LRU淘汰)
+      lyrics:
+        max-size: 2000
+        expire-after-access: 12h
+      # 歌手信息 - L1+L2, 7天
+      artist_info:
+        max-size: 1000
+        expire-after-write: 168h
+      # 分类数据 - L1+L2, 24小时
+      categories:
+        max-size: 100
+        expire-after-write: 24h
+      # 标签数据 - L1+L2, 24小时 (歌单分类标签)
+      tags:
+        max-size: 100
+        expire-after-write: 24h
+      # 热门搜索 - L1, 30分钟
+      search_hot:
+        max-size: 50
+        expire-after-write: 30m
+      # 搜索结果 - L1, 5分钟
+      search_results:
+        max-size: 1000
+        expire-after-write: 5m
+      # 用户信息 - L1, 1小时
+      user_info:
+        max-size: 500
+        expire-after-write: 1h
+      # 歌单详情 - L1, 2小时
+      playlist_detail:
+        max-size: 500
+        expire-after-write: 2h
+      # 歌手作品 - L1, 2小时
+      artist_works:
+        max-size: 500
+        expire-after-write: 2h
+
+  # SQLite持久化配置
+  sqlite:
+    enabled: true
+    path: ${user.home}/.gocache/cache.db
+    cleanup-interval: 1h
+    # HikariCP连接池配置
+    hikari:
+      pool-size: 10
+      connection-timeout: 30000      # 30 seconds
+      idle-timeout: 600000           # 10 minutes
+      max-lifetime: 1800000          # 30 minutes
+      connection-test-query: "SELECT 1"
+      initialization-fail-timeout: -1
+
+  # 文件存储配置
+  storage:
+    enabled: true
+    path: ${user.home}/.gocache/media
+    lyrics-path: ${user.home}/.gocache/lyrics
+    max-size: 1073741824000  # 1000GB in bytes
+    cleanup-threshold: 0.9
+    cleanup-target: 0.7
+    download-concurrency: 3
+    download-timeout: 10m
+    download-retries: 3
+
+  # 规范化存储配置
+  normalized:
+    enabled: true
 
 # Micrometer Tracing 配置
 management:

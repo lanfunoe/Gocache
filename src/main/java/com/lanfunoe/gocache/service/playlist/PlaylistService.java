@@ -1,14 +1,18 @@
 package com.lanfunoe.gocache.service.playlist;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
+import com.lanfunoe.gocache.dto.TagResponse;
 import com.lanfunoe.gocache.service.BaseGocacheService;
+import com.lanfunoe.gocache.service.cache.EntityCacheService;
 import com.lanfunoe.gocache.service.common.CommonService;
 import com.lanfunoe.gocache.service.common.request.GetRequest;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
-import com.lanfunoe.gocache.util.CryptoUtils;
+import com.lanfunoe.gocache.service.data.TagDataConverter;
 import com.lanfunoe.gocache.util.EncryptionUtils;
-import com.lanfunoe.gocache.util.SignatureUtils;
 import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,13 +32,20 @@ import java.util.Map;
 public class PlaylistService extends BaseGocacheService {
 
     private final CommonService commonService;
+    private final EntityCacheService cacheService;
+    private final TagDataConverter tagDataConverter;
+    ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     public PlaylistService(GocacheConfig gocacheConfig,
-                                WebClientRequestBuilder webClientRequestBuilder,
-                                EncryptionUtils encryptionUtils,
-                                CommonService commonService) {
+                           WebClientRequestBuilder webClientRequestBuilder,
+                           EncryptionUtils encryptionUtils,
+                           CommonService commonService,
+                           EntityCacheService cacheService,
+                           TagDataConverter tagDataConverter) {
         super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
         this.commonService = commonService;
+        this.cacheService = cacheService;
+        this.tagDataConverter = tagDataConverter;
     }
 
     /**
@@ -190,78 +201,35 @@ public class PlaylistService extends BaseGocacheService {
     /**
      * 获取歌单分类标签
      */
-    public Mono<Map<String, Object>> getPlaylistTags(String cookie) {
-        String dfid = "-";
-        String mid = CryptoUtils.md5(dfid);
-        String uuid = CryptoUtils.md5(dfid + mid);
-        long clienttime = System.currentTimeMillis() / 1000;
-
-        AuthInfo authInfo = parseCookie(cookie);
-
-        Map<String, Object> requestData = new HashMap<>();
-        requestData.put("tag_type", "collection");
-        requestData.put("tag_id", 0);
-        requestData.put("source", 3);
-
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("dfid", dfid);
-        queryParams.put("mid", mid);
-        queryParams.put("uuid", uuid);
-        queryParams.put("appid", gocacheConfig.getAppid());
-        queryParams.put("clientver", gocacheConfig.getClientver());
-        queryParams.put("userid", authInfo.userid());
-        queryParams.put("clienttime", clienttime);
-        if (!authInfo.token().isEmpty()) {
-            queryParams.put("token", authInfo.token());
-        }
-
-        String dataJson = "{\"tag_type\":\"collection\",\"tag_id\":0,\"source\":3}";
-        queryParams.put("signature", SignatureUtils.signatureAndroidParams(queryParams, dataJson));
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("x-router", "gateway.kugou.com");
-        headers.put(GocacheConstants.HEADER_USER_AGENT, GocacheConstants.USER_AGENT_ANDROID);
-        headers.put("dfid", dfid);
-        headers.put("clienttime", String.valueOf(clienttime));
-        headers.put("mid", mid);
-        if (cookie != null) {
-            headers.put("Cookie", cookie);
-        }
-
-        PostRequest postRequest = new PostRequest(
-                "/pubsongs/v1/get_tags_by_type",
-                requestData,
-                queryParams,
-                headers,
-                "android"
+    public Mono<List<TagResponse>> getPlaylistTags(String userId, String token) {
+        return cacheService.getAllTags(
+                () -> {
+                    // API调用获取原始响应
+                    Map<String, Object> requestData = new HashMap<>();
+                    requestData.put("tag_type", "collection");
+                    requestData.put("tag_id", 0);
+                    requestData.put("source", 3);
+                    PostRequest postRequest = new PostRequest(
+                            "/pubsongs/v1/get_tags_by_type",
+                            requestData,
+                            null,
+                            null,
+                            "android"
+                    );
+                    return commonService.postWithDefaultsAndAuth(postRequest, token, userId).map(response -> {
+                        try {
+                            Object data = response.get("data");
+                            return mapper.convertValue(data, new TypeReference<List<TagResponse>>() {});
+                        } catch (Exception e) {
+                            log.error("Failed to convert API response data to TagResponse list", e);
+                            return List.of();
+                        }
+                    });
+                },
+                true
         );
-
-        return commonService.post(postRequest);
     }
 
-    /**
-     * 解析Cookie获取认证信息
-     */
-    private AuthInfo parseCookie(String cookie) {
-        String userid = "0";
-        String token = "";
-        if (cookie != null && !cookie.isEmpty()) {
-            String[] cookieParts = cookie.split(";");
-            for (String part : cookieParts) {
-                String[] keyValue = part.trim().split("=");
-                if (keyValue.length == 2) {
-                    String key = keyValue[0].trim();
-                    String value = keyValue[1].trim();
-                    if ("userid".equals(key)) {
-                        userid = value;
-                    } else if ("token".equals(key)) {
-                        token = value;
-                    }
-                }
-            }
-        }
-        return new AuthInfo(token, userid);
-    }
 
     /**
      * 解析歌曲数据
@@ -315,10 +283,6 @@ public class PlaylistService extends BaseGocacheService {
         return resourceList;
     }
 
-    /**
-     * 认证信息
-     */
-    public record AuthInfo(String token, String userid) {}
 
     /**
      * 获取歌单歌曲请求

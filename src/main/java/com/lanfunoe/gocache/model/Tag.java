@@ -29,29 +29,4 @@ public class Tag extends BaseEntity {
      * 排序
      */
     private Integer sort;
-
-    /**
-     * 是否热门
-     */
-    private Integer hot;
-
-    /**
-     * 是否发布
-     */
-    private Integer publish;
-
-    /**
-     * 标签图片URL
-     */
-    private String imgurl;
-
-    /**
-     * 标签颜色
-     */
-    private String color;
-
-    /**
-     * 特殊类型
-     */
-    private Integer specialType;
 }

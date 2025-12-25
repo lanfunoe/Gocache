@@ -336,11 +336,6 @@ public class SQLiteDataSourceConfig {
                 tagname TEXT NOT NULL,
                 parentid INTEGER DEFAULT 0,
                 sort INTEGER DEFAULT 0,
-                hot INTEGER DEFAULT 0,
-                publish INTEGER DEFAULT 1,
-                imgurl TEXT,
-                color TEXT,
-                special_type INTEGER DEFAULT 0,
                 created_at INTEGER NOT NULL,
                 updated_at INTEGER NOT NULL
             )
