@@ -1,6 +1,5 @@
 package com.lanfunoe.gocache.config;
 
-import com.lanfunoe.gocache.service.cache.CacheConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.annotation.PreDestroy;
