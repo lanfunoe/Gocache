@@ -31,7 +31,6 @@ public class DefaultParamsBuilder {
         params.put("appid", gocacheConfig.getAppid());
         params.put("clientver", gocacheConfig.getClientver());
         params.put("clienttime", clienttime);
-        params.put("userid", 0); // 默认userid
 
         return params;
     }
@@ -46,11 +45,11 @@ public class DefaultParamsBuilder {
     public Map<String, Object> buildDefaultParamsWithAuth(String token, String userid) {
         Map<String, Object> params = buildDefaultParams();
 
-        if (StringUtils.isNotBlank(token)) {
+        if (StringUtils.isNotEmpty(token)) {
             params.put("token", token);
         }
 
-        if (StringUtils.isNotBlank(userid)) {
+        if (StringUtils.isNotEmpty(userid)) {
             params.put("userid", userid);
         }
 
