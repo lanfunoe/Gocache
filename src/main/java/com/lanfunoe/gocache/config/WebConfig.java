@@ -28,6 +28,7 @@ public class WebConfig {
     public CodecCustomizer codecCustomizer() {
         return configurer -> {
             ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setPropertyNamingStrategy(com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE);
             configurer.customCodecs().register(
                     new Jackson2JsonDecoder(objectMapper, MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
             configurer.customCodecs().register(
