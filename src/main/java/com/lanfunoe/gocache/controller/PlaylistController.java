@@ -251,16 +251,11 @@ public class PlaylistController extends BaseController {
     /**
      * 获取歌单分类标签
      *
-     * @param cookie 用户Cookie
      * @return 歌单分类标签列表
      */
     @GetMapping("/tags")
-    public Mono<ResponseEntity<Map<String, Object>>> getPlaylistTags(
-            @RequestHeader(value = "Cookie", required = false) String cookie,
-            ServerHttpRequest request) {
+    public Mono<ResponseEntity<Map<String, Object>>> getPlaylistTags(ServerHttpRequest request) {
 
-        return handleBoxOperation("获取歌单分类标签",
-                playlistService.getPlaylistTags(CookieUtils.extractUserIdCompatible(request), CookieUtils.extractTokenCompatible(request)),
-                cookie != null ? "with_cookie" : "no_cookie");
+        return handleBoxOperation("获取歌单分类标签", playlistService.getPlaylistTags(CookieUtils.extractUserIdCompatible(request), CookieUtils.extractTokenCompatible(request)));
     }
 }
