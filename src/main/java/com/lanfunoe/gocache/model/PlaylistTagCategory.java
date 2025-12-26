@@ -4,29 +4,34 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * 标签实体
+ * 歌单标签分类实体
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Tag extends BaseEntity {
+public class PlaylistTagCategory extends BaseEntity {
 
     /**
      * 标签ID（主键）
      */
-    private Long tagid;
+    private Long tagId;
 
     /**
      * 标签名称
      */
-    private String tagname;
+    private String tagName;
 
     /**
      * 父级标签ID（自关联）
      */
-    private Long parentid;
+    private Long parentId;
 
     /**
      * 排序
      */
     private Integer sort;
+
+    /**
+     * 额外信息（JSON格式）
+     */
+    private String extraInfo;
 }

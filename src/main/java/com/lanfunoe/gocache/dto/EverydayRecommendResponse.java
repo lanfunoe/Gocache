@@ -1,6 +1,5 @@
 package com.lanfunoe.gocache.dto;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -15,6 +14,7 @@ public record EverydayRecommendResponse(
         String biBiz,
         String sign,
         Integer songListSize,
+        @JsonProperty("OlexpIds")
         String OlexpIds,
         Integer clientPlaylistFlag,
         Integer isGuaranteeRec,
@@ -49,7 +49,7 @@ public record EverydayRecommendResponse(
             String mvHash,
             String hash,
             String authorName,
-            List<Tag> tags,
+            List<PlaylistTagCategory> tags,
             String rankLabel,
             @JsonProperty("rank_id")
             String rankId,
@@ -105,7 +105,7 @@ public record EverydayRecommendResponse(
             Integer isPublish,
             String recSubCopyWrite
     ) {
-        public record Tag(
+        public record PlaylistTagCategory(
                 String tagId,
                 String parentId,
                 String tagName
@@ -130,6 +130,7 @@ public record EverydayRecommendResponse(
                 Integer cpyGrade,
                 Map<String, Long> classmap,
                 String language,
+                @JsonProperty("cpy_attr0")
                 Long cpyAttr0,
                 Integer musicpackAdvance,
                 @JsonProperty("ogg_128_filesize")
@@ -150,7 +151,9 @@ public record EverydayRecommendResponse(
                 String ogg128Hash,
                 String unionCover,
                 @JsonProperty("ogg_320_filesize")
-                Long ogg320Filesize
+                Long ogg320Filesize,
+                String songnameSuffix,
+                Boolean allQualityFree
         ) {
             public record HashOffset(
                     String clipHash,

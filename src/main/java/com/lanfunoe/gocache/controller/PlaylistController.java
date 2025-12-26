@@ -255,7 +255,6 @@ public class PlaylistController extends BaseController {
      */
     @GetMapping("/tags")
     public Mono<ResponseEntity<Map<String, Object>>> getPlaylistTags(ServerHttpRequest request) {
-
         return handleBoxOperation("获取歌单分类标签", playlistService.getPlaylistTags(CookieUtils.extractUserIdCompatible(request), CookieUtils.extractTokenCompatible(request)));
     }
 }

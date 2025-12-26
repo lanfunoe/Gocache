@@ -8,7 +8,7 @@ public record PlaylistTrackAllResponse(
     Integer pagesize,
     Integer count,
     java.util.Map<String, Object> popularization,
-    Long userid,
+    String userid,
     java.util.List<Song> songs,
     ListInfo listInfo
 ) {
@@ -43,7 +43,7 @@ public record PlaylistTrackAllResponse(
         Integer sort,
         TransParam transParam,
         String medistype,
-        Long userId,
+        String userId,
         AlbumInfo albuminfo,
         Integer bitrate,
         String audioGroupId,
@@ -113,7 +113,7 @@ public record PlaylistTrackAllResponse(
         Integer isPri,
         Integer pubNew,
         Integer isDrop,
-        Long list_create_userid,
+        String list_create_userid,
         Integer isPublish,
         java.util.List<MusiclibTag> musiclibTags,
         Integer pubType,

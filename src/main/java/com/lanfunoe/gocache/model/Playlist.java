@@ -11,19 +11,49 @@ import lombok.EqualsAndHashCode;
 public class Playlist extends BaseEntity {
 
     /**
-     * 歌单ID（主键）
+     * 全局收藏ID（主键）
      */
-    private Long specialid;
+    private String globalCollectionId;
+
+    /**
+     * 列表ID
+     */
+    private Integer listid;
+
+    /**
+     * 创建列表ID
+     */
+    private Integer listCreateListid;
+
+    /**
+     * 创建用户ID
+     */
+    private String listCreateUserid;
+
+    /**
+     * 创建用户名
+     */
+    private String listCreateUsername;
+
+    /**
+     * 创建GID
+     */
+    private String listCreateGid;
 
     /**
      * 歌单名称
      */
+    private String name;
+
+    /**
+     * 特殊名称（备用）
+     */
     private String specialname;
 
     /**
-     * 歌单封面URL
+     * 封面图
      */
-    private String imgurl;
+    private String pic;
 
     /**
      * 灵活封面
@@ -36,79 +66,24 @@ public class Playlist extends BaseEntity {
     private String intro;
 
     /**
-     * 标签（逗号分隔）
+     * 标签（JSON数组）
      */
     private String tags;
 
     /**
      * 歌曲数量
      */
-    private Integer songcount;
+    private Integer count;
 
     /**
-     * 播放次数
+     * 排序
      */
-    private Long playcount;
+    private Integer sort;
 
     /**
-     * 收藏次数
+     * 作者列表（JSON数组）
      */
-    private Integer collectcount;
-
-    /**
-     * 分享次数
-     */
-    private Integer shareCount;
-
-    /**
-     * 创建者用户ID
-     */
-    private Long userid;
-
-    /**
-     * 创建者昵称
-     */
-    private String nickname;
-
-    /**
-     * 创建者头像
-     */
-    private String userPic;
-
-    /**
-     * 歌单类型
-     */
-    private Integer ptype;
-
-    /**
-     * 类型
-     */
-    private Integer type;
-
-    /**
-     * 是否全局
-     */
-    private Integer isglobal;
-
-    /**
-     * 是否发布
-     */
-    private Integer isPublish;
-
-    /**
-     * 是否精选
-     */
-    private Integer isFeatured;
-
-    /**
-     * 是否私有
-     */
-    private Integer isPri;
-
-    /**
-     * 全局收藏ID
-     */
-    private String globalCollectionId;
+    private String authors;
 
     /**
      * 发布日期
@@ -116,12 +91,7 @@ public class Playlist extends BaseEntity {
     private String publishDate;
 
     /**
-     * 创建时间
+     * 额外信息（JSON格式）
      */
-    private Long createTime;
-
-    /**
-     * 更新时间
-     */
-    private Long updateTime;
+    private String extraInfo;
 }

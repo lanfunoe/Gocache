@@ -33,8 +33,8 @@ public class WebClientLoggingFilter {
         return (request, next) -> {
             // 构建请求日志
             StringBuilder outboundRequest = new StringBuilder();
+            outboundRequest.append(request.url()).append("\n");
             outboundRequest.append("Method: ").append(request.method()).append("\n");
-            outboundRequest.append("Url: ").append(request.url()).append("\n");
             outboundRequest.append("Headers: ");
             request.headers().forEach((name, values) ->
                     values.forEach(value -> outboundRequest.append(name).append("=").append(value).append(" ; "))
@@ -55,7 +55,7 @@ public class WebClientLoggingFilter {
                 }
             });
 
-            log.info("\nOUTBOUND REQUEST:\n{}", outboundRequest);
+            log.info("\nOUTBOUND REQUEST:{}", outboundRequest);
 
             return next.exchange(request)
                     .flatMap(this::logResponse);

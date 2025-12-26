@@ -24,7 +24,7 @@ public record TopPlaylistResponse(
         String singername,
         Integer from,
         String algPath,
-        java.util.List<Tag> tags,
+        java.util.List<PlaylistTagCategory> tags,
         Integer ugcTalentReview,
         Integer type,
         Integer slid,
@@ -51,7 +51,7 @@ public record TopPlaylistResponse(
             Integer transFlag
         ) {}
 
-        public record Tag(
+        public record PlaylistTagCategory(
             String tagName,
             Integer tagId
         ) {}

@@ -21,14 +21,14 @@ public class Album extends BaseEntity {
     private String albumName;
 
     /**
-     * 专辑封面URL
+     * 可变尺寸封面
      */
-    private String albumImg;
+    private String sizableCover;
 
     /**
-     * 专辑简介
+     * 固定封面
      */
-    private String intro;
+    private String cover;
 
     /**
      * 发布日期
@@ -36,9 +36,9 @@ public class Album extends BaseEntity {
     private String publishDate;
 
     /**
-     * 是否发布
+     * 专辑简介
      */
-    private Integer publish;
+    private String intro;
 
     /**
      * 歌曲数量
@@ -46,12 +46,7 @@ public class Album extends BaseEntity {
     private Integer songCount;
 
     /**
-     * 语言
+     * 额外信息（JSON格式）
      */
-    private String language;
-
-    /**
-     * 流派
-     */
-    private String genre;
+    private String extraInfo;
 }

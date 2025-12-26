@@ -63,7 +63,7 @@ public record SearchMusicResponse(
         String suffix,
         Integer matchFlag,
         Long scid,
-        java.util.List<Singer> singers,
+        java.util.List<Artist> singers,
         String auxiliary,
         Integer rankId,
         String publishDate,
@@ -133,7 +133,7 @@ public record SearchMusicResponse(
             Integer timeLength
         ) {}
 
-        public record Singer(
+        public record Artist(
             String name,
             Long ipId,
             Long id

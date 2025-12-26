@@ -41,13 +41,13 @@ public final class DateTimeUtils {
     }
 
     /**
-     * 格式化日期为 yyyyMMdd
+     * 格式化日期为 yyyy-MM-dd
      *
      * @param dateTime 日期时间
      * @return 格式化后的日期字符串
      */
     public static String formatDateYMD(LocalDateTime dateTime) {
-        return dateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
     /**

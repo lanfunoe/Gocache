@@ -1,9 +1,9 @@
 package com.lanfunoe.gocache.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.codec.CodecCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -25,15 +25,10 @@ public class WebConfig {
      * 配置支持 text/plain 作为 JSON 响应的解析
      */
     @Bean
-    public CodecCustomizer codecCustomizer() {
-        return configurer -> {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.setPropertyNamingStrategy(com.fasterxml.jackson.databind.PropertyNamingStrategies.SNAKE_CASE);
-            configurer.customCodecs().register(
-                    new Jackson2JsonDecoder(objectMapper, MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
-            configurer.customCodecs().register(
-                    new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON));
-        };
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        return mapper;
     }
 
     /**
@@ -58,6 +53,7 @@ public class WebConfig {
         configurer.defaultCodecs().maxInMemorySize((int) maxInMemorySize.toBytes());
 
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         configurer.customCodecs().register(
                 new Jackson2JsonDecoder(objectMapper, MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
         configurer.customCodecs().register(

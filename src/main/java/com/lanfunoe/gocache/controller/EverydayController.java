@@ -1,19 +1,21 @@
 package com.lanfunoe.gocache.controller;
 
-import com.lanfunoe.gocache.service.common.CommonService;
-import com.lanfunoe.gocache.service.common.request.GetRequest;
+import com.lanfunoe.gocache.service.everyday.EverydayService;
+import com.lanfunoe.gocache.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 每日推荐控制器
- *
  * 提供每日推荐相关的API接口
  *
  */
@@ -23,29 +25,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EverydayController extends BaseController {
 
-    private final CommonService commonService;
+    private final EverydayService everydayService;
 
     /**
      * 获取每日推荐
      *
      * @param platform 平台类型（默认ios）
-     * @return 每日推荐内容
+     * @return 标准化响应包含每日推荐歌曲列表
      */
     @GetMapping("/recommend")
     public Mono<ResponseEntity<Map<String, Object>>> getEverydayRecommend(
-            @RequestParam(required = false, defaultValue = "ios") String platform) {
-
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("platform", platform);
-
-        // 构建请求头
-        Map<String, String> headers = new HashMap<>();
-        headers.put("x-router", "everydayrec.service.kugou.com");
-
-        GetRequest request = new GetRequest("/everyday_song_recommend", queryParams, headers);
-
-        return handleOperation("获取每日推荐",
-            commonService.get(request),
-            platform);
+            @RequestParam(required = false, defaultValue = "ios") String platform,
+            ServerHttpRequest request) {
+        String token = CookieUtils.extractTokenCompatible(request);
+        String userId = CookieUtils.extractUserIdCompatible(request);
+        return handleBoxOperation("获取每日推荐", everydayService.getEverydayRecommend(platform, token, userId), platform);
     }
 }

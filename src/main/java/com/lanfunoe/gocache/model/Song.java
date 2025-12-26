@@ -23,9 +23,24 @@ public class Song extends BaseEntity {
     private Long audioId;
 
     /**
+     * 混音歌曲ID
+     */
+    private String mixsongid;
+
+    /**
      * 歌曲名称
      */
+    private String name;
+
+    /**
+     * 歌曲名称（备用字段，与name相同）
+     */
     private String songname;
+
+    /**
+     * 音频名称
+     */
+    private String audioName;
 
     /**
      * 文件名
@@ -33,9 +48,9 @@ public class Song extends BaseEntity {
     private String filename;
 
     /**
-     * 时长（秒）
+     * 歌手名称
      */
-    private Integer duration;
+    private String authorName;
 
     /**
      * 专辑ID
@@ -43,14 +58,74 @@ public class Song extends BaseEntity {
     private Long albumId;
 
     /**
+     * 专辑名称
+     */
+    private String albumName;
+
+    /**
+     * 固定封面
+     */
+    private String cover;
+
+    /**
+     * 可变尺寸封面
+     */
+    private String sizableCover;
+
+    /**
+     * 时长（秒）
+     */
+    private Integer duration;
+
+    /**
+     * 比特率
+     */
+    private Integer bitrate;
+
+    /**
+     * 文件大小
+     */
+    private Long filesize;
+
+    /**
+     * 文件扩展名
+     */
+    private String extname;
+
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 权限
+     */
+    private Integer privilege;
+
+    /**
+     * MV Hash
+     */
+    private String mvhash;
+
+    /**
+     * 128K音质Hash
+     */
+    private String hash128;
+
+    /**
+     * 320K音质Hash
+     */
+    private String hash320;
+
+    /**
+     * 无损音质Hash
+     */
+    private String hashFlac;
+
+    /**
      * 语言
      */
     private String language;
-
-    /**
-     * 流派
-     */
-    private String genre;
 
     /**
      * 发布日期
@@ -58,41 +133,11 @@ public class Song extends BaseEntity {
     private String publishDate;
 
     /**
-     * 播放次数
+     * 额外信息（JSON格式）
      */
-    private Long playCount;
-
-    /**
-     * 收藏次数
-     */
-    private Long collectCount;
-
-    /**
-     * 分享次数
-     */
-    private Long shareCount;
-
-    /**
-     * 评论次数
-     */
-    private Long commentCount;
-
-    /**
-     * MV Hash
-     */
-    private String mvhash;
+    private String extraInfo;
 
     // ========== 关联数据（非数据库字段）==========
-
-    /**
-     * 歌手名称（冗余字段，用于显示）
-     */
-    private transient String singername;
-
-    /**
-     * 专辑名称（冗余字段，用于显示）
-     */
-    private transient String albumName;
 
     /**
      * 关联的歌手ID列表
