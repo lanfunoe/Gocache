@@ -195,26 +195,23 @@
             <version>3.1.8</version>
         </dependency>
 
-        <!-- SQLite for persistent cache -->
+        <!-- Spring Data R2DBC -->
         <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.45.1.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
         </dependency>
 
-        <!-- HikariCP Connection Pool -->
+        <!-- PostgreSQL R2DBC Driver -->
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>5.1.0</version>
+            <groupId>org.postgresql</groupId>
+            <artifactId>r2dbc-postgresql</artifactId>
+            <version>1.0.5.RELEASE</version>
         </dependency>
 
-        <!-- P6Spy for SQL monitoring (optional - uncomment to enable detailed SQL logging) -->
-
+        <!-- R2DBC Connection Pool -->
         <dependency>
-            <groupId>p6spy</groupId>
-            <artifactId>p6spy</artifactId>
-            <version>3.9.1</version>
+            <groupId>io.r2dbc</groupId>
+            <artifactId>r2dbc-pool</artifactId>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>

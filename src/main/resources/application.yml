@@ -61,21 +61,21 @@ cache:
         max-size: 500
         expire-after-write: 2h
 
-  # SQLite持久化配置
-  sqlite:
+  # PostgreSQL持久化配置
+  postgresql:
     enabled: true
-    path: ${user.home}/.gocache/cache.db
-    cleanup-interval: 1h
-    # HikariCP连接池配置
-    hikari:
-      pool-size: 10
-      connection-timeout: 30000      # 30 seconds
-      idle-timeout: 600000           # 10 minutes
-      max-lifetime: 1800000          # 30 minutes
-      connection-test-query: "SELECT 1"
-      initialization-fail-timeout: -1
-      jdbc-url-prefix: "jdbc:p6spy:sqlite:"  # 使用p6spy进行SQL日志记录
-      pool-name: "SQLiteCache-HikariPool"
+    host: localhost
+    port: 5432
+    database: gocache
+    username: lanfunoe
+    password: password
+    ssl: false
+    # R2DBC连接池配置
+    pool:
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 10m
+      max-life-time: 30m
 
   # 文件存储配置
   storage:

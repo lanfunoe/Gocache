@@ -96,3 +96,15 @@ application-dev.yml
 .serena/
 AGENTS.md
 CLAUDE.md
+
+# Docker volumes
+docker-volumes/
+
+# PostgreSQL data
+*.db
+*.db-shm
+*.db-wal
+
+# Application data
+media/
+logs/

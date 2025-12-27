@@ -1,0 +1,64 @@
+# Docker Compose 配置文件定义了 GoCache 应用及其依赖服务的容器化部署配置
+# 包含 PostgreSQL 数据库服务和 GoCache 应用服务
+version: '3.8'
+
+# 定义应用所需的服务
+services:
+  # PostgreSQL 数据库服务配置
+  # 用于存储 GoCache 应用的数据
+  postgres:
+    image: postgres:17.7-alpine  # 使用 PostgreSQL 17.7 的 Alpine 镜像
+    container_name: gocache-postgres  # 容器名称
+    environment:  # 数据库环境变量配置
+      POSTGRES_DB: gocache  # 设置数据库名称
+      POSTGRES_USER: lanfunoe  # 设置数据库用户名
+      POSTGRES_PASSWORD: password  # 设置数据库密码
+    ports:
+      - "5432:5432"  # 将主机的 5432 端口映射到容器的 5432 端口
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  # 数据持久化卷
+    healthcheck:  # 健康检查配置
+      test: ["CMD-SHELL", "pg_isready -U gocache"]  # 检查数据库是否就绪
+      interval: 10s  # 检查间隔
+      timeout: 5s  # 超时时间
+      retries: 5  # 重试次数
+    networks:
+      - gocache-network  # 连接到 gocache 网络
+
+  # GoCache 应用服务配置
+  gocache:
+    build:  # 构建配置
+      context: .  # 构建上下文为当前目录
+      dockerfile: Dockerfile  # 使用 Dockerfile 进行构建
+    container_name: gocache-app  # 容器名称
+    ports:
+      - "6522:6522"  # 将主机的 6522 端口映射到容器的 6522 端口
+    depends_on:  # 服务依赖关系
+      postgres:
+        condition: service_healthy  # 依赖于 postgres 服务健康状态
+    environment:  # 应用环境变量配置
+      CACHE_POSTGRESQL_HOST: postgres  # PostgreSQL 主机地址
+      CACHE_POSTGRESQL_PORT: 5432  # PostgreSQL 端口
+      CACHE_POSTGRESQL_DATABASE: gocache  # PostgreSQL 数据库名
+      CACHE_POSTGRESQL_USERNAME: lanfunoe  # PostgreSQL 用户名
+      CACHE_POSTGRESQL_PASSWORD: password# PostgreSQL 密码
+    volumes:
+      - gocache-media:/app/media  # 媒体文件持久化卷
+      - gocache-logs:/app/logs  # 日志文件持久化卷
+    networks:
+      - gocache-network  # 连接到 gocache 网络
+    restart: unless-stopped  # 重启策略
+
+# 定义持久化卷
+volumes:
+  postgres-data:  # PostgreSQL 数据存储卷
+    driver: local
+  gocache-media:  # GoCache 媒体文件存储卷
+    driver: local
+  gocache-logs:  # GoCache 日志文件存储卷
+    driver: local
+
+# 定义网络配置
+networks:
+  gocache-network:  # GoCache 应用网络
+    driver: bridge  # 使用桥接网络模式
