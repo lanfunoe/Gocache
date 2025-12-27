@@ -28,21 +28,24 @@ public class DailyRecommendId {
      */
     private String songHash;
 
+    private Long audioId;
+
     /**
      * 从 DailyRecommend 实体创建主键
      */
     public static DailyRecommendId of(DailyRecommend dailyRecommend) {
         return new DailyRecommendId(
-            dailyRecommend.getUserId(),
-            dailyRecommend.getRecommendDate(),
-            dailyRecommend.getSongHash()
+                dailyRecommend.getUserId(),
+                dailyRecommend.getRecommendDate(),
+                dailyRecommend.getSongHash(),
+                dailyRecommend.getAudioId()
         );
     }
 
     /**
      * 创建主键
      */
-    public static DailyRecommendId of(String userId, String recommendDate, String songHash) {
-        return new DailyRecommendId(userId, recommendDate, songHash);
+    public static DailyRecommendId of(String userId, String recommendDate, String songHash, Long audioId) {
+        return new DailyRecommendId(userId, recommendDate, songHash, audioId);
     }
 }

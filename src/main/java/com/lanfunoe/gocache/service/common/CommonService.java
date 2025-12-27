@@ -1,11 +1,8 @@
 package com.lanfunoe.gocache.service.common;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.service.common.request.GetRequest;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
-import com.lanfunoe.gocache.util.EncryptionUtils;
-import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -20,11 +17,6 @@ import java.util.Map;
 @Service
 public class CommonService extends BaseGocacheService {
 
-    public CommonService(GocacheConfig gocacheConfig,
-                              WebClientRequestBuilder webClientRequestBuilder,
-                              EncryptionUtils encryptionUtils) {
-        super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
-    }
 
     // ========================= POST请求方法 =========================
 
@@ -35,7 +27,7 @@ public class CommonService extends BaseGocacheService {
         return webClientRequestBuilder.sendPostRequest(
                 webClientRequestBuilder.createDefaultWebClient(),
                 request.getPath(),
-                request.getData(),
+                request.getPostBody(),
                 request.getQueryParams(),
                 request.getHeaders(),
                 MAP_TYPE_REF
@@ -44,13 +36,28 @@ public class CommonService extends BaseGocacheService {
 
 
     /**
+     * 发送POST请求（带默认参数和加密类型）
+     */
+    public Mono<Map<String, Object>> postWithDefaults(PostRequest request) {
+        return webClientRequestBuilder.sendPostRequestWithDefaults(
+                webClientRequestBuilder.createDefaultWebClient(),
+                request.getPath(),
+                request.getPostBody(),
+                request.getQueryParams(),
+                request.getHeaders(),
+                request.getEncryptType(),
+                MAP_TYPE_REF
+        );
+    }
+
+    /**
      * 发送POST请求（带默认参数、用户认证和加密类型）
      */
     public Mono<Map<String, Object>> postWithDefaultsAndAuth(PostRequest request, String token, String userid) {
         return webClientRequestBuilder.sendPostRequestWithDefaultsAndAuth(
                 webClientRequestBuilder.createDefaultWebClient(),
                 request.getPath(),
-                request.getData(),
+                request.getPostBody(),
                 request.getQueryParams(),
                 request.getHeaders(),
                 request.getEncryptType(),

@@ -54,9 +54,6 @@ public class SQLiteDataSourceConfig {
         // Create the data source
         dataSource = new HikariDataSource(config);
 
-        // Initialize WAL mode on first connection
-        initializeWalMode();
-
         log.info("SQLite HikariCP DataSource initialized at: {} with pool size: {}",
                 dbPath, hikariConfig.getPoolSize());
 
@@ -86,26 +83,13 @@ public class SQLiteDataSourceConfig {
 
         // Don't fail if DB doesn't exist yet (SQLite creates it)
         config.setInitializationFailTimeout(hikariConfig.getInitializationFailTimeout());
+
+        // Ensure all connections use WAL mode by setting connection initialization SQL
+        config.setConnectionInitSql("PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;");
+
         return config;
     }
 
-    /**
-     * Initialize SQLite WAL mode for better concurrency
-     */
-    private void initializeWalMode() {
-        try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
-            initializeWalMode(stmt);
-        } catch (SQLException e) {
-            log.warn("Failed to enable WAL mode", e);
-        }
-    }
-
-    public void initializeWalMode(Statement stmt) throws SQLException {
-        stmt.execute("PRAGMA journal_mode=WAL");
-        stmt.execute("PRAGMA synchronous=NORMAL");
-        log.debug("SQLite WAL mode enabled");
-    }
 
 
     @PreDestroy
