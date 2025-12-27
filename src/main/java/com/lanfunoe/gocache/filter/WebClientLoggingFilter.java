@@ -32,31 +32,29 @@ public class WebClientLoggingFilter {
     public ExchangeFilterFunction loggingFilter() {
         return (request, next) -> {
             // 构建请求日志
-            StringBuilder outboundRequest = new StringBuilder();
-            outboundRequest.append(request.url()).append("\n");
-            outboundRequest.append("Method: ").append(request.method()).append("\n");
-            outboundRequest.append("Headers: ");
-            request.headers().forEach((name, values) ->
-                    values.forEach(value -> outboundRequest.append(name).append("=").append(value).append(" ; "))
-            );
-
+            String method = request.method().name();
+            String url = request.url().toString();
+            String headers = request.headers().toString();
+            StringBuilder bodyStr = new StringBuilder();
             // 打印 POST 请求体 (从 request attribute 中获取)
             request.attribute(REQUEST_BODY_ATTR).ifPresent(body -> {
                 try {
-                    String bodyStr;
+
                     if (body instanceof String) {
-                        bodyStr = (String) body;
+                        bodyStr.append(body);
                     } else {
-                        bodyStr = OBJECT_MAPPER.writeValueAsString(body);
+                        bodyStr.append(OBJECT_MAPPER.writeValueAsString(body));
                     }
-                    outboundRequest.append("\nBody: ").append(bodyStr);
                 } catch (JsonProcessingException e) {
-                    outboundRequest.append("\nBody: [serialization failed: ").append(e.getMessage()).append("]");
+                    bodyStr.append("[serialization failed: ").append(e.getMessage()).append("]");
                 }
             });
-
-            log.info("\nOUTBOUND REQUEST:{}", outboundRequest);
-
+            String requestInfo = String.format("%s %s\nHeaders: %s\nBody: %s",
+                    method,
+                    url,
+                    headers,
+                    StringUtils.isBlank(bodyStr) ? "{}" : bodyStr);
+            log.info("OUTBOUND REQUEST: {}", requestInfo);
             return next.exchange(request)
                     .flatMap(this::logResponse);
         };

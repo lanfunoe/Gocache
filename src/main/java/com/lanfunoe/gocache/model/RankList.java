@@ -1,14 +1,14 @@
 package com.lanfunoe.gocache.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
 
 /**
  * 排行榜实体
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class RankList extends BaseEntity {
+public class RankList{
 
     /**
      * 排行榜ID（主键）
@@ -44,4 +44,14 @@ public class RankList extends BaseEntity {
      * 额外信息（JSON格式）
      */
     private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedAt;
 }

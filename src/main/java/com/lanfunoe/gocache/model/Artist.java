@@ -1,14 +1,20 @@
 package com.lanfunoe.gocache.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * 艺术家/歌手实体
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Artist extends BaseEntity {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Artist {
 
     /**
      * 艺术家ID（主键）
@@ -64,4 +70,14 @@ public class Artist extends BaseEntity {
      * 额外信息（JSON格式）
      */
     private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedAt;
 }

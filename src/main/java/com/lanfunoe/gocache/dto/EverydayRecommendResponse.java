@@ -34,7 +34,7 @@ public record EverydayRecommendResponse(
             Integer isOriginal,
             Integer payType,
             String songType,
-            String albumId,
+            Long albumId,
             String remark,
             String language,
             @JsonProperty("is_file_head_320")
@@ -73,7 +73,7 @@ public record EverydayRecommendResponse(
             @JsonProperty("filesize_320")
             Long filesize320,
             Integer level,
-            Long timeLength,
+            Integer timeLength,
             String recCopyWriteId,
             Integer oldCpy,
             String recLabelPrefix,
@@ -166,5 +166,14 @@ public record EverydayRecommendResponse(
             ) {
             }
         }
+    }
+
+/**
+     * 创建每日推荐响应（用于从L2缓存重建）
+     */
+    public static EverydayRecommendResponse create(String date, List<SongItem> songItems) {
+        return new EverydayRecommendResponse(
+                date, "", "", "", songItems.size(), "", 0, 0, songItems, "", ""
+        );
     }
 }

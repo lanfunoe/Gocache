@@ -1,16 +1,15 @@
 package com.lanfunoe.gocache.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * 歌曲实体
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Song extends BaseEntity {
+public class Song {
 
     /**
      * 歌曲Hash（复合主键之一）
@@ -27,13 +26,9 @@ public class Song extends BaseEntity {
      */
     private String mixsongid;
 
-    /**
-     * 歌曲名称
-     */
-    private String name;
 
     /**
-     * 歌曲名称（备用字段，与name相同）
+     * 歌曲名称
      */
     private String songname;
 
@@ -136,6 +131,16 @@ public class Song extends BaseEntity {
      * 额外信息（JSON格式）
      */
     private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedAt;
 
     // ========== 关联数据（非数据库字段）==========
 

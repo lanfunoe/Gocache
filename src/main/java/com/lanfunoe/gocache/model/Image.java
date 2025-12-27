@@ -1,15 +1,13 @@
 package com.lanfunoe.gocache.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 图片资源实体
  * 统一管理各实体的图片资源
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Image extends BaseEntity {
+public class Image {
 
     /**
      * 自增主键

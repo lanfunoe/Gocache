@@ -1,14 +1,14 @@
 package com.lanfunoe.gocache.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户实体
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class User extends BaseEntity {
+public class User {
 
     /**
      * 用户ID（主键）
@@ -79,4 +79,14 @@ public class User extends BaseEntity {
      * 额外信息（JSON格式）
      */
     private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updatedAt;
 }

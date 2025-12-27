@@ -3,14 +3,14 @@ package com.lanfunoe.gocache.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
 
 /**
  * 歌词元数据实体
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Lyric extends BaseEntity {
+public class Lyric {
 
     /**
      * 数据库主键（自增）
@@ -100,6 +100,39 @@ public class Lyric extends BaseEntity {
      * 格式（krc/lrc/txt）
      */
     private String fmt;
+
+    /**
+     * 歌曲名称
+     */
+    private String songName;
+
+    /**
+     * 歌手名称
+     */
+    private String singer;
+
+    /**
+     * 歌曲时长（秒）
+     */
+    private Integer duration;
+
+    /**
+     * 额外信息（JSON格式）
+     */
+    @JsonIgnore
+    private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    @JsonIgnore
+    private LocalDateTime createdAt;
+
+    /**
+     * 更新时间
+     */
+    @JsonIgnore
+    private LocalDateTime updatedAt;
 
     // ========== 非数据库字段（运行时填充） ==========
 

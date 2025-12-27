@@ -1,7 +1,8 @@
 package com.lanfunoe.gocache.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.time.LocalDateTime;
 
 /**
  * 每日推荐实体
@@ -9,8 +10,7 @@ import lombok.EqualsAndHashCode;
  * 复合主键: (user_id, recommend_date, song_hash)
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class DailyRecommend extends BaseEntity {
+public class DailyRecommend  {
 
     /**
      * 用户ID（复合主键之一）
@@ -38,32 +38,12 @@ public class DailyRecommend extends BaseEntity {
     private String oriAudioName;
 
     /**
-     * 歌曲名
-     */
-    private String songname;
-
-    /**
-     * 可变尺寸封面
-     */
-    private String sizableCover;
-
-    /**
-     * 歌手名
-     */
-    private String authorName;
-
-    /**
-     * 时长（秒）
-     */
-    private Integer timeLength;
-
-    /**
-     * 文件名
-     */
-    private String filename;
-
-    /**
      * 额外信息（JSON格式）
      */
     private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
 }

@@ -30,7 +30,7 @@ public class InboundRequestContextFilter implements WebFilter {
                 .contextCapture()  // 捕获当前上下文，确保 MDC 可用
                 .doFirst(() -> {
                     // doFirst 在订阅时执行，此时上下文已被正确设置
-                    String requestInfo = String.format("[%s %s%s]",
+                    String requestInfo = String.format("%s %s%s",
                             method,
                             path,
                             query != null ? "?" + query : "");

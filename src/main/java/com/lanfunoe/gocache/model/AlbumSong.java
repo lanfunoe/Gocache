@@ -8,49 +8,35 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 专辑实体
+ * 专辑-歌曲关联实体
+ * 表示歌曲属于哪个专辑
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Album {
+public class AlbumSong{
 
     /**
-     * 专辑ID（主键）
+     * 专辑ID（复合主键之一）
      */
     private Long albumId;
 
     /**
-     * 专辑名称
+     * 音频ID（复合主键之一）
      */
-    private String albumName;
+    private Long audioId;
 
     /**
-     * 可变尺寸封面
+     * 歌曲哈希值
      */
-    private String sizableCover;
+    private String songHash;
 
     /**
-     * 固定封面
-     */
-    private String cover;
-
-    /**
-     * 发布日期
-     */
-    private String publishDate;
-
-    /**
-     * 专辑简介
-     */
-    private String intro;
-
-    /**
-     * 歌曲数量
+     * 曲目编号（专辑中的第几首歌）
      */
     @Builder.Default
-    private Integer songCount = 0;
+    private Integer trackNo = 0;
 
     /**
      * 额外信息（JSON格式）
@@ -63,7 +49,9 @@ public class Album {
     private LocalDateTime createdAt;
 
     /**
-     * 更新时间
+     * 获取复合主键
      */
-    private LocalDateTime updatedAt;
+    public AlbumSongId getId() {
+        return new AlbumSongId(albumId, audioId);
+    }
 }

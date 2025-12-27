@@ -1,15 +1,21 @@
 package com.lanfunoe.gocache.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * 歌曲音质版本实体
  * 存储不同音质版本的文件信息
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class SongQuality extends BaseEntity {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SongQuality {
 
     /**
      * 音频ID（复合主键之一）
@@ -50,4 +56,9 @@ public class SongQuality extends BaseEntity {
      * 额外信息（JSON格式）
      */
     private String extraInfo;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
 }
