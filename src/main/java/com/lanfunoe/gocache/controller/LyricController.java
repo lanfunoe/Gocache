@@ -1,5 +1,6 @@
 package com.lanfunoe.gocache.controller;
 
+import com.lanfunoe.gocache.model.Lyric;
 import com.lanfunoe.gocache.service.lyrics.LyricsService;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -30,15 +31,15 @@ public class LyricController extends BaseController {
     /**
      * 获取歌词
      *
-     * @param id        歌词ID
+     * @param id        歌词ID (hash)
      * @param accesskey 访问密钥
      * @param client    客户端类型
      * @param fmt       歌词格式 (krc/lrc)
      * @param decode    是否解码歌词内容
-     * @return 歌词内容
+     * @return 歌词内容（Lyric实体）
      */
     @GetMapping
-    public Mono<ResponseEntity<Map<String, Object>>> getLyric(
+    public Mono<ResponseEntity<Lyric>> getLyric(
             @RequestParam @NotBlank(message = "歌词ID不能为空") String id,
             @RequestParam @NotBlank(message = "访问密钥不能为空") String accesskey,
             @RequestParam(required = false, defaultValue = "android") String client,
@@ -48,7 +49,7 @@ public class LyricController extends BaseController {
         LyricsService.LyricsRequest request = new LyricsService.LyricsRequest(
                 id, accesskey, client, fmt, decode);
 
-        return handleOperation("获取歌词",
+        return handleEntityOperation("获取歌词",
             lyricsService.getLyrics(request),
             id, client, fmt, decode);
     }

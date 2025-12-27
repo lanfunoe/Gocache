@@ -1,6 +1,5 @@
 package com.lanfunoe.gocache.service.user;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.util.CryptoUtils;
@@ -23,12 +22,6 @@ import java.util.Map;
 @Slf4j
 @Service
 public class UserContentService extends BaseGocacheService {
-
-    public UserContentService(GocacheConfig gocacheConfig,
-                                   WebClientRequestBuilder webClientRequestBuilder,
-                                   EncryptionUtils encryptionUtils) {
-        super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
-    }
 
     /**
      * 获取听歌记录

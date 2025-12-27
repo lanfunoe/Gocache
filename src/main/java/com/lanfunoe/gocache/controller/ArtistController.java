@@ -69,7 +69,7 @@ public class ArtistController extends BaseController {
         String dfid = CookieUtils.extractDfid(request);
 
         ArtistService.ArtistAudiosRequest audiosRequest = new ArtistService.ArtistAudiosRequest(
-                id, page, pagesize, sort, dfid);
+                id, String.valueOf(page), String.valueOf(pagesize), sort, dfid);
 
         return handleOperation("获取歌手音乐列表",
             artistService.getArtistAudios(audiosRequest),

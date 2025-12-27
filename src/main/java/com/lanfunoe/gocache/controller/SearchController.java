@@ -2,11 +2,12 @@ package com.lanfunoe.gocache.controller;
 
 import com.lanfunoe.gocache.service.lyrics.LyricsService;
 import com.lanfunoe.gocache.service.search.SearchService;
+import com.lanfunoe.gocache.util.CookieUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,7 +58,6 @@ public class SearchController extends BaseController {
      * @param page     页码
      * @param pagesize 每页大小
      * @param type     搜索类型：song, album, author, mv, lyric, special
-     * @param cookie   用户Cookie
      * @return 搜索结果
      */
     @GetMapping
@@ -66,10 +66,10 @@ public class SearchController extends BaseController {
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "30") Integer pagesize,
             @RequestParam(required = false, defaultValue = "song") String type,
-            @RequestHeader(value = "Cookie", required = false) String cookie) {
+            ServerHttpRequest serverHttpRequest) {
 
         SearchService.SearchRequest request = new SearchService.SearchRequest(
-                keywords, page, pagesize, type, cookie);
+                keywords, page, pagesize, type, CookieUtils.extractUserIdCompatible(serverHttpRequest), CookieUtils.extractTokenCompatible(serverHttpRequest));
 
         return handleOperation("搜索", searchService.search(request), keywords, page, pagesize, type);
     }

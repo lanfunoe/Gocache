@@ -1,15 +1,14 @@
 package com.lanfunoe.gocache.service.music;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.service.music.strategy.UrlStrategy;
 import com.lanfunoe.gocache.util.CryptoUtils;
-import com.lanfunoe.gocache.util.EncryptionUtils;
 import com.lanfunoe.gocache.util.SignatureUtils;
 import com.lanfunoe.gocache.util.WebClientRequestBuilder;
+import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,21 +31,11 @@ import java.util.Map;
 @Service
 public class MusicService extends BaseGocacheService {
 
-    private final ObjectMapper objectMapper;
-    private final UrlStrategy standardUrlStrategy;
-    private final UrlStrategy cloudUrlStrategy;
+    @Resource
+    private  ObjectMapper objectMapper;
+    @Resource
+    private  UrlStrategy cloudUrlStrategy;
 
-    public MusicService(GocacheConfig gocacheConfig,
-                             WebClientRequestBuilder webClientRequestBuilder,
-                             EncryptionUtils encryptionUtils,
-                             ObjectMapper objectMapper,
-                             UrlStrategy standardUrlStrategy,
-                             UrlStrategy cloudUrlStrategy) {
-        super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
-        this.objectMapper = objectMapper;
-        this.standardUrlStrategy = standardUrlStrategy;
-        this.cloudUrlStrategy = cloudUrlStrategy;
-    }
 
 
     /**

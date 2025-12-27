@@ -2,18 +2,14 @@ package com.lanfunoe.gocache.service.playlist;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.dto.TagResponse;
 import com.lanfunoe.gocache.service.BaseGocacheService;
-import com.lanfunoe.gocache.service.cache.EntityCacheService;
+import com.lanfunoe.gocache.service.cache.CombinedCacheService;
 import com.lanfunoe.gocache.service.common.CommonService;
 import com.lanfunoe.gocache.service.common.request.GetRequest;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
-import com.lanfunoe.gocache.service.data.TagDataConverter;
-import com.lanfunoe.gocache.util.EncryptionUtils;
-import com.lanfunoe.gocache.util.WebClientRequestBuilder;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -31,22 +27,13 @@ import java.util.Map;
 @Service
 public class PlaylistService extends BaseGocacheService {
 
-    private final CommonService commonService;
-    private final EntityCacheService cacheService;
-    private final TagDataConverter tagDataConverter;
-    ObjectMapper mapper = new ObjectMapper().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    @Resource
+    private  CommonService commonService;
+    @Resource
+    private  CombinedCacheService cacheService;
+    @Resource
+    ObjectMapper mapper;
 
-    public PlaylistService(GocacheConfig gocacheConfig,
-                           WebClientRequestBuilder webClientRequestBuilder,
-                           EncryptionUtils encryptionUtils,
-                           CommonService commonService,
-                           EntityCacheService cacheService,
-                           TagDataConverter tagDataConverter) {
-        super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
-        this.commonService = commonService;
-        this.cacheService = cacheService;
-        this.tagDataConverter = tagDataConverter;
-    }
 
     /**
      * 获取歌单所有歌曲

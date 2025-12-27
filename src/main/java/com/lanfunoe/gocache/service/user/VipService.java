@@ -1,10 +1,7 @@
 package com.lanfunoe.gocache.service.user;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.service.BaseGocacheService;
-import com.lanfunoe.gocache.util.EncryptionUtils;
-import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -20,11 +17,6 @@ import java.util.Map;
 @Service
 public class VipService extends BaseGocacheService {
 
-    public VipService(GocacheConfig gocacheConfig,
-                           WebClientRequestBuilder webClientRequestBuilder,
-                           EncryptionUtils encryptionUtils) {
-        super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
-    }
 
     /**
      * 获取VIP详情

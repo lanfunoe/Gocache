@@ -1,11 +1,8 @@
 package com.lanfunoe.gocache.service.auth;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.service.BaseGocacheService;
-import com.lanfunoe.gocache.util.EncryptionUtils;
 import com.lanfunoe.gocache.util.QRCodeUtils;
-import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -21,11 +18,6 @@ import java.util.Map;
 @Service
 public class AuthService extends BaseGocacheService {
 
-    public AuthService(GocacheConfig gocacheConfig,
-                            WebClientRequestBuilder webClientRequestBuilder,
-                            EncryptionUtils encryptionUtils) {
-        super(gocacheConfig, webClientRequestBuilder, encryptionUtils);
-    }
 
     /**
      * 账号密码登录
