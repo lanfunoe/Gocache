@@ -34,6 +34,9 @@ public class CacheConfig {
      */
     @Data
     public static class CaffeineConfig {
+        /** 是否启用Caffeine缓存 */
+        private boolean enabled = true;
+
         /** 各缓存区域的配置 */
         private Map<String, CacheSpec> specs = new HashMap<>();
 
@@ -99,6 +102,12 @@ public class CacheConfig {
 
         /** 初始化失败超时(-1表示不失败) */
         private long initializationFailTimeout = -1;
+
+        /** JDBC URL前缀 (例如: jdbc:p6spy:sqlite: 或 jdbc:sqlite:) */
+        private String jdbcUrlPrefix = "jdbc:sqlite:";
+
+        /** 连接池名称 */
+        private String poolName = "HikariPool";
     }
 
     /**

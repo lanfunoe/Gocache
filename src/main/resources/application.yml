@@ -20,6 +20,7 @@ cache:
   enabled: true
   # Caffeine内存缓存配置
   caffeine:
+    enabled: true
     default-max-size: 1000
     default-expire-after-write: 1h
     specs:
@@ -73,6 +74,8 @@ cache:
       max-lifetime: 1800000          # 30 minutes
       connection-test-query: "SELECT 1"
       initialization-fail-timeout: -1
+      jdbc-url-prefix: "jdbc:p6spy:sqlite:"  # 使用p6spy进行SQL日志记录
+      pool-name: "SQLiteCache-HikariPool"
 
   # 文件存储配置
   storage:
@@ -104,8 +107,10 @@ management:
 # 日志配置
 logging:
   level:
-    com.lanfunoe.gocache: DEBUG
+    com.lanfunoe.gocache: debug
     org.springframework.web: INFO
+    com.p6spy: debug
+    p6spy: debug
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{traceId:-no-trace},%X{spanId:-no-span}] %msg%n"
   include-application-name: false

@@ -209,6 +209,13 @@
             <version>5.1.0</version>
         </dependency>
 
+        <!-- P6Spy for SQL monitoring (optional - uncomment to enable detailed SQL logging) -->
+
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.1</version>
+        </dependency>
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
