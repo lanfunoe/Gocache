@@ -1,7 +1,5 @@
 # Docker Compose 配置文件定义了 GoCache 应用及其依赖服务的容器化部署配置
 # 包含 PostgreSQL 数据库服务和 GoCache 应用服务
-version: '3.8'
-
 # 定义应用所需的服务
 services:
   # PostgreSQL 数据库服务配置
