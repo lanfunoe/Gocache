@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 每日推荐复合主键
  * 由 user_id, recommend_date, song_hash 组成
@@ -11,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DailyRecommendId {
+public class DailyRecommendId implements Serializable {
 
     /**
      * 用户ID
