@@ -109,8 +109,6 @@ logging:
   level:
     com.lanfunoe.gocache: debug
     org.springframework.web: INFO
-    com.p6spy: debug
-    p6spy: debug
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%X{traceId:-no-trace},%X{spanId:-no-span}] %msg%n"
   include-application-name: false

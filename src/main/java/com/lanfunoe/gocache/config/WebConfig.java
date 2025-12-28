@@ -52,11 +52,9 @@ public class WebConfig {
     private void configureClientCodecs(ClientCodecConfigurer configurer) {
         configurer.defaultCodecs().maxInMemorySize((int) maxInMemorySize.toBytes());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         configurer.customCodecs().register(
-                new Jackson2JsonDecoder(objectMapper, MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
+                new Jackson2JsonDecoder(objectMapper(), MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
         configurer.customCodecs().register(
-                new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON));
+                new Jackson2JsonEncoder(objectMapper(), MediaType.APPLICATION_JSON));
     }
 }
