@@ -108,3 +108,4 @@ docker-volumes/
 # Application data
 media/
 logs/
+.ace-tool/
