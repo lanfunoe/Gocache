@@ -153,7 +153,8 @@ public record EverydayRecommendResponse(
                 @JsonProperty("ogg_320_filesize")
                 Long ogg320Filesize,
                 String songnameSuffix,
-                Boolean allQualityFree
+                Boolean allQualityFree,
+                Boolean freeForAd
         ) {
             public record HashOffset(
                     String clipHash,

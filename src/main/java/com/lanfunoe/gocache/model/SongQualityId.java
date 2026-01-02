@@ -22,4 +22,6 @@ public class SongQualityId implements Serializable {
      * 音质Hash
      */
     private String qualityHash;
+
+    private String songHash;
 }

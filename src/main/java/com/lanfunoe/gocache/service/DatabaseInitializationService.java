@@ -119,7 +119,7 @@ public class DatabaseInitializationService {
                     CREATE TABLE IF NOT EXISTS song (
                         audio_id BIGINT NOT NULL,
                         hash TEXT NOT NULL,
-                        mixsongid BIGINT,
+                        mixsongid TEXT,
                         songname TEXT,
                         audio_name TEXT,
                         filename TEXT,
@@ -167,9 +167,9 @@ public class DatabaseInitializationService {
                         privilege INTEGER,
                         extra_info TEXT,
                         created_at TIMESTAMP,
-                        PRIMARY KEY (audio_id, quality_hash)
+                        PRIMARY KEY (audio_id, quality_hash, song_hash)
                     )
-                    """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_song_quality_hash ON song_quality(song_hash)")),
+                    """),
 
                 // 7. 歌单标签分类表
                 createTable("""
@@ -187,7 +187,8 @@ public class DatabaseInitializationService {
                 // 8. 歌单表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS playlist (
-                        global_collection_id TEXT PRIMARY KEY NOT NULL,
+                        global_collection_id TEXT NOT NULL,
+                        category_id INTEGER NOT NULL,
                         listid BIGINT,
                         list_create_listid BIGINT,
                         list_create_userid BIGINT,
@@ -204,13 +205,13 @@ public class DatabaseInitializationService {
                         authors TEXT,
                         publish_date TEXT,
                         extra_info TEXT,
-                        created_at TIMESTAMP,
-                        updated_at TIMESTAMP
+                        PRIMARY KEY (global_collection_id, category_id)
                     )
                     """).then(
                         Mono.when(
                             createIndex("CREATE INDEX IF NOT EXISTS idx_playlist_listid ON playlist(listid)"),
-                            createIndex("CREATE INDEX IF NOT EXISTS idx_playlist_creator ON playlist(list_create_userid)")
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_playlist_creator ON playlist(list_create_userid)"),
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_playlist_category_id ON playlist(category_id)")
                         )
                     ),
 
@@ -283,9 +284,14 @@ public class DatabaseInitializationService {
                         listen_count INTEGER,
                         last_listen_time TIMESTAMP,
                         extra_info TEXT,
-                        PRIMARY KEY (user_id, audio_id)
+                        PRIMARY KEY (user_id, audio_id, song_hash)
                     )
-                    """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_listen_history_time ON user_listen_history(last_listen_time)")),
+                    """).then(
+                        Mono.when(
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_listen_history_time ON user_listen_history(last_listen_time)"),
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_listen_history_user_audio ON user_listen_history(user_id, audio_id)")
+                        )
+                    ),
 
                 // 14. 用户云盘歌曲表
                 createTable("""
@@ -391,7 +397,7 @@ public class DatabaseInitializationService {
 
                 // 20. 歌曲播放URL缓存表
                 createTable("""
-                    CREATE TABLE IF NOT EXISTS song_url_cache (
+                    CREATE TABLE IF NOT EXISTS song_url (
                         hash TEXT NOT NULL,
                         quality TEXT NOT NULL,
                         audio_id BIGINT,
@@ -403,12 +409,12 @@ public class DatabaseInitializationService {
                         expire_time TIMESTAMP,
                         extra_info TEXT,
                         created_at TIMESTAMP,
-                        PRIMARY KEY (hash, quality)
+                        PRIMARY KEY (audio_id, hash, quality)
                     )
                     """).then(
                         Mono.when(
-                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_audio_id ON song_url_cache(audio_id)"),
-                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_expire ON song_url_cache(expire_time)")
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_audio_id ON song_url(audio_id)"),
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_expire ON song_url(expire_time)")
                         )
                     ),
 

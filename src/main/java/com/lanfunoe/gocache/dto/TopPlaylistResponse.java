@@ -1,5 +1,7 @@
 package com.lanfunoe.gocache.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 热门歌单响应DTO
  */
@@ -9,6 +11,7 @@ public record TopPlaylistResponse(
     String session,
     Integer algId,
     java.util.List<SpecialList> specialList,
+    @JsonProperty("OlexpIds")
     String OlexpIds,
     Integer showTime,
     Integer allClientPlaylistFlag,
@@ -17,7 +20,7 @@ public record TopPlaylistResponse(
     public record SpecialList(
         Integer sync,
         String publishtime,
-        Long specialid,
+        Integer specialid,
         Integer percount,
         ListInfoTransParam listInfoTransParam,
         Integer bzStatus,
@@ -31,6 +34,7 @@ public record TopPlaylistResponse(
         String flexibleCover,
         String nickname,
         String show,
+        @JsonProperty("collectType")
         Integer collectType,
         Long collectcount,
         TransParam transParam,
@@ -43,12 +47,15 @@ public record TopPlaylistResponse(
         Integer fromTag,
         String globalCollectionId,
         String intro,
-        Long suid
+        Long suid,
+        Object abtags,
+        Object ztcInfo
     ) {
         public record ListInfoTransParam(
             Integer specialTag,
             Integer iden,
-            Integer transFlag
+            Integer transFlag,
+            Object skin
         ) {}
 
         public record PlaylistTagCategory(

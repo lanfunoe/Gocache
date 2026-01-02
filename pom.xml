@@ -124,7 +124,6 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>context-propagation</artifactId>
-            <version>1.1.1</version>
         </dependency>
 
         <!-- AOP support for @Observed annotation -->

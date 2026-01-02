@@ -1,13 +1,10 @@
 package com.lanfunoe.gocache.model;
 
 import lombok.Data;
-
-import java.time.LocalDateTime;
-
-
-import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDateTime;
 
 
 
@@ -20,11 +17,16 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Playlist  {
 
     /**
-     * 全局收藏ID（主键）
+     * 全局收藏ID（复合主键之一）
      */
-    @Id
     @Column("global_collection_id")
     private String globalCollectionId;
+
+    /**
+     * 分类ID（复合主键之一）
+     */
+    @Column("category_id")
+    private Integer categoryId;
 
     /**
      * 列表ID
@@ -42,7 +44,7 @@ public class Playlist  {
      * 创建用户ID
      */
     @Column("list_create_userid")
-    private String listCreateUserid;
+    private Long listCreateUserid;
 
     /**
      * 创建用户名
@@ -123,14 +125,9 @@ public class Playlist  {
     private String extraInfo;
 
     /**
-     * 创建时间
+     * 获取复合主键
      */
-    @Column("created_at")
-    private LocalDateTime createdAt;
-
-    /**
-     * 更新时间
-     */
-    @Column("updated_at")
-    private LocalDateTime updatedAt;
+    public PlaylistId getId() {
+        return new PlaylistId(globalCollectionId, categoryId);
+    }
 }

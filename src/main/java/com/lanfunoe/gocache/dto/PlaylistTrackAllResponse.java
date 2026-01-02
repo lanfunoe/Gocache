@@ -1,5 +1,8 @@
 package com.lanfunoe.gocache.dto;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 歌单所有歌曲响应DTO
  */
@@ -7,9 +10,9 @@ public record PlaylistTrackAllResponse(
     Integer beginIdx,
     Integer pagesize,
     Integer count,
-    java.util.Map<String, Object> popularization,
+    Map<String, Object> popularization,
     String userid,
-    java.util.List<Song> songs,
+    List<Song> songs,
     ListInfo listInfo
 ) {
     public record Song(
@@ -32,10 +35,10 @@ public record PlaylistTrackAllResponse(
         Integer csong,
         String remark,
         Integer level,
-        java.util.Map<String, Long> tagmap,
+        Map<String, Long> tagmap,
         Integer mediaOldCpy,
-        java.util.List<RelateGood> relateGoods,
-        java.util.List<Download> download,
+        List<RelateGood> relateGoods,
+        List<Download> download,
         Integer rcflag,
         Integer feetype,
         Integer hasObbligato,
@@ -52,7 +55,7 @@ public record PlaylistTrackAllResponse(
         Long mixsongid,
         Integer fileid,
         Integer heat,
-        java.util.List<SingerInfo> singerinfo
+        List<SingerInfo> singerinfo
     ) {
         public record RelateGood(
             Long size,
@@ -78,14 +81,14 @@ public record PlaylistTrackAllResponse(
             Integer musicpackAdvance,
             Integer display,
             Integer displayRate,
-            java.util.Map<String, Object> qualitymap,
+            Map<String, Object> qualitymap,
             Long ogg320Filesize,
             Long cid,
             String ogg128Hash,
             Long ogg128Filesize,
             String ogg320Hash,
-            java.util.Map<String, Long> ipmap,
-            java.util.Map<String, Long> classmap,
+            Map<String, Long> ipmap,
+            Map<String, Long> classmap,
             Integer payBlockTpl,
             Integer cpyLevel
         ) {}
@@ -106,16 +109,16 @@ public record PlaylistTrackAllResponse(
     }
 
     public record ListInfo(
-        java.util.List<?> abtags,
+        List<?> abtags,
         String tags,
         Integer status,
         String create_user_pic,
         Integer isPri,
         Integer pubNew,
         Integer isDrop,
-        String list_create_userid,
+        Long list_create_userid,
         Integer isPublish,
-        java.util.List<MusiclibTag> musiclibTags,
+        List<MusiclibTag> musiclibTags,
         Integer pubType,
         Integer isFeatured,
         String publishDate,
@@ -133,7 +136,7 @@ public record PlaylistTrackAllResponse(
         String parentGlobalCollectionId,
         String soundQuality,
         Integer perCount,
-        java.util.List<?> plist,
+        List<?> plist,
         Long createTime,
         Integer isPer,
         Integer isEdit,

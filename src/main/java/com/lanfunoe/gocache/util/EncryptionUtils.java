@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -192,7 +194,7 @@ public class EncryptionUtils {
     public Map<String, Object> buildMusicPrivilegeEncryptedParams(String[] hashArray, String[] albumIdArray,
                                                                   int appid, String clientver) {
         // 构建资源列表
-        java.util.List<Map<String, Object>> resourceList = new java.util.ArrayList<>();
+        List<Map<String, Object>> resourceList = new ArrayList<>();
         for (int i = 0; i < hashArray.length; i++) {
             Map<String, Object> resource = new HashMap<>();
             resource.put("type", GocacheConstants.RESOURCE_TYPE_AUDIO);

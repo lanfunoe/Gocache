@@ -36,7 +36,7 @@ public class SongQuality {
     private String qualityHash;
 
     /**
-     * 歌曲Hash
+     * 歌曲Hash（复合主键之一）
      */
     @Column("song_hash")
     private String songHash;
@@ -81,6 +81,6 @@ public class SongQuality {
      * 获取复合主键
      */
     public SongQualityId getId() {
-        return new SongQualityId(audioId, qualityHash);
+        return new SongQualityId(audioId, qualityHash, songHash);
     }
 }

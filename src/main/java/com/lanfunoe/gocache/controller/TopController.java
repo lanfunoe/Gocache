@@ -1,11 +1,10 @@
 package com.lanfunoe.gocache.controller;
 
 import com.lanfunoe.gocache.config.GocacheConfig;
-import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.service.common.CommonService;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
+import com.lanfunoe.gocache.service.top.TopPlaylistService;
 import com.lanfunoe.gocache.util.CookieUtils;
-import com.lanfunoe.gocache.util.CryptoUtils;
 import com.lanfunoe.gocache.util.SignatureUtils;
 import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +28,7 @@ public class TopController extends BaseController {
 
     private final CommonService commonService;
     private final GocacheConfig gocacheConfig;
+    private final TopPlaylistService topPlaylistService;
 
 
     /**
@@ -91,68 +91,13 @@ public class TopController extends BaseController {
      * @return 热门歌单列表
      */
     @GetMapping("/playlist")
-    public Mono<ResponseEntity<Map<String, Object>>> getTopPlaylist(
-            @RequestParam(required = false, defaultValue = "0") Integer category_id,
-            @RequestParam(required = false, defaultValue = "1") Integer page,
-            @RequestParam(required = false, defaultValue = "30") Integer pagesize,
-            @RequestParam(required = false, defaultValue = "1") Integer withtag,
-            @RequestParam(required = false, defaultValue = "1") Integer withsong,
-            @RequestParam(required = false, defaultValue = "1") Integer sort,
-            @RequestParam(required = false, defaultValue = "1") Integer module_id,
-            ServerHttpRequest request) {
+    public Mono<ResponseEntity<Map<String, Object>>> getTopPlaylist(@RequestParam(required = false, defaultValue = "0") Integer category_id, @RequestParam(required = false, defaultValue = "1") Integer page, @RequestParam(required = false, defaultValue = "30") Integer pagesize, @RequestParam(required = false, defaultValue = "1") Integer withtag, @RequestParam(required = false, defaultValue = "1") Integer withsong, @RequestParam(required = false, defaultValue = "1") Integer sort, @RequestParam(required = false, defaultValue = "1") Integer module_id, ServerHttpRequest request) {
 
         String userid = CookieUtils.extractUserIdCompatible(request);
         String token = CookieUtils.extractTokenCompatible(request);
 
-        long dateTime = System.currentTimeMillis() / 1000;
-
-        // 构建special_recommend对象
-        Map<String, Object> specialRecommend = new HashMap<>();
-        specialRecommend.put("withtag", withtag);
-        specialRecommend.put("withsong", withsong);
-        specialRecommend.put("sort", sort);
-        specialRecommend.put("ugc", 1);
-        specialRecommend.put("is_selected", 0);
-        specialRecommend.put("withrecommend", 1);
-        specialRecommend.put("area_code", 1);
-        specialRecommend.put("categoryid", category_id);
-
-        Map<String, Object> postBody = new HashMap<>();
-        String dfid = "-";
-        String mid = CryptoUtils.md5(dfid);
-        postBody.put("mid", mid);
-        postBody.put("platform", "android");
-        postBody.put("clientver", gocacheConfig.getClientver());
-        postBody.put("appid", gocacheConfig.getAppid());
-        postBody.put("clienttime", dateTime);
-        postBody.put("userid", Long.parseLong(userid));
-        postBody.put("module_id", module_id);
-        postBody.put("page", page);
-        postBody.put("pagesize", pagesize);
-        postBody.put("key", SignatureUtils.signParamsKey(String.valueOf(dateTime), String.valueOf(gocacheConfig.getAppid()), gocacheConfig.getClientver()));
-        postBody.put("special_recommend", specialRecommend);
-        postBody.put("req_multi", 1);
-        postBody.put("retrun_min", 5);
-        postBody.put("return_special_falg", 1);
-
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("platform", "android");
-
-        // 构建请求头
-        Map<String, String> headers = WebClientRequestBuilder.buildHeadersWithRouter("specialrec.service.kugou.com");
-        headers.put(GocacheConstants.HEADER_USER_AGENT, GocacheConstants.USER_AGENT_ANDROID);
-
-
-        PostRequest postRequest = new PostRequest(
-                "/v2/special_recommend",
-                postBody,
-                queryParams,
-                headers,
-                "android"
-        );
-
-        return handleOperation("获取热门歌单",
-            commonService.postWithDefaultsAndAuth(postRequest, token, userid),
-            category_id, page, pagesize);
+        return handleBoxOperation("获取热门歌单",
+                topPlaylistService.getTopPlaylist(category_id, page, pagesize, withtag, withsong, sort, module_id, token, userid),
+                category_id, page, pagesize);
     }
 }

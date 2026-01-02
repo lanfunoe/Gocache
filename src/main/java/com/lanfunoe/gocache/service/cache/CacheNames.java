@@ -56,6 +56,9 @@ public final class CacheNames {
     /** 歌手作品列表 - 2小时过期 */
     public static final String ARTIST_WORKS = "artist_works";
 
+    /** 热门歌单 - 30分钟过期 */
+    public static final String TOP_PLAYLIST = "top_playlist";
+
     // ========== 缓存键前缀 ==========
 
     /** 歌词缓存键前缀 */
@@ -76,12 +79,9 @@ public final class CacheNames {
     /** 用户缓存键前缀 */
     public static final String KEY_PREFIX_USER = "user:";
 
-    /** 歌单缓存键前缀 */
-    public static final String KEY_PREFIX_PLAYLIST = "playlist:";
 
-    /** 每日推荐缓存键前缀 */
-    public static final String KEY_PREFIX_EVERYDAY = "everyday:";
 
     public static final String KEY_PREFIX_TAGS = "tags:";
+
 
 }
