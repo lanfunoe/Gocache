@@ -8,16 +8,13 @@ import com.lanfunoe.gocache.model.ArtistSong;
 import com.lanfunoe.gocache.model.DailyRecommend;
 import com.lanfunoe.gocache.model.Song;
 import com.lanfunoe.gocache.model.SongQuality;
-import com.lanfunoe.gocache.model.SongQualityId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -207,7 +204,6 @@ public class DailyRecommendConverter {
                 .albumId(songItem.albumId())
                 .albumName(songItem.albumName())
                 .sizableCover(songItem.sizableCover())
-                .publishDate(songItem.publishDate())
                 .build();
     }
 
@@ -344,7 +340,6 @@ public class DailyRecommendConverter {
         if (audioId == null || songHash == null) {
             return qualities;
         }
-        Set<SongQualityId> qualityIds = new HashSet<>();
         // 128K
         if (songItem.hash128() != null) {
             qualities.add(SongQuality.builder()
@@ -352,108 +347,96 @@ public class DailyRecommendConverter {
                     .qualityHash(songItem.hash128())
                     .songHash(songHash)
                     .level(0)
-                    .bitrate(128)
+                    .qualityVersion("128")
                     .filesize(songItem.filesize128())
                     .privilege(privilege)
                     .build());
         }
-        qualityIds.add(qualities.getLast().getId());
+
 
         // 192K
         if (songItem.hash192() != null) {
-            SongQuality songQuality = SongQuality.builder()
+            qualities.add(SongQuality.builder()
                     .audioId(audioId)
                     .qualityHash(songItem.hash192())
                     .songHash(songHash)
                     .level(1)
-                    .bitrate(192)
+                    .qualityVersion("192")
                     .filesize(songItem.filesize192())
                     .privilege(privilege)
-                    .build();
-            addWhenNull(qualityIds, songQuality, qualities);
+                    .build());
         }
 
         // 320K
         if (songItem.hash320() != null) {
-            SongQuality songQuality = SongQuality.builder()
+            qualities.add(SongQuality.builder()
                     .audioId(audioId)
                     .qualityHash(songItem.hash320())
                     .songHash(songHash)
                     .level(2)
-                    .bitrate(320)
+                    .qualityVersion("320")
                     .filesize(songItem.filesize320())
                     .privilege(privilege)
-                    .build();
-            addWhenNull(qualityIds, songQuality, qualities);
+                    .build());
         }
 
         // FLAC
         if (songItem.hashFlac() != null) {
-            SongQuality songQuality = SongQuality.builder()
+            qualities.add(SongQuality.builder()
                     .audioId(audioId)
                     .qualityHash(songItem.hashFlac())
                     .songHash(songHash)
                     .level(3)
-                    .bitrate(songItem.bitrate() != null ? songItem.bitrate() : 0)
+                    .qualityVersion("FLAC")
                     .filesize(songItem.filesizeFlac())
                     .privilege(privilege)
-                    .build();
-            addWhenNull(qualityIds, songQuality, qualities);
+                    .build());
         }
 
         // APE
         if (songItem.hashApe() != null) {
-            SongQuality songQuality = SongQuality.builder()
+            qualities.add(SongQuality.builder()
                     .audioId(audioId)
                     .qualityHash(songItem.hashApe())
                     .songHash(songHash)
                     .level(4)
-                    .bitrate(0)
+                    .qualityVersion("APE")
                     .filesize(songItem.filesizeApe())
                     .privilege(privilege)
-                    .build();
-            addWhenNull(qualityIds, songQuality, qualities);
+                    .build());
+
         }
 
         // OGG 128K (from trans_param)
         EverydayRecommendResponse.SongItem.TransParam transParam = songItem.transParam();
         if (transParam != null && transParam.ogg128Hash() != null) {
-            SongQuality songQuality = SongQuality.builder()
+            qualities.add(SongQuality.builder()
                     .audioId(audioId)
                     .qualityHash(transParam.ogg128Hash())
                     .songHash(songHash)
                     .level(0)
-                    .bitrate(128)
+                    .qualityVersion("ogg128")
                     .filesize(transParam.ogg128Filesize())
                     .privilege(privilege)
-                    .build();
-            addWhenNull(qualityIds, songQuality, qualities);
+                    .build());
         }
 
         // OGG 320K (from trans_param)
         if (transParam != null && transParam.ogg320Hash() != null) {
-            SongQuality songQuality = SongQuality.builder()
+            qualities.add(SongQuality.builder()
                     .audioId(audioId)
                     .qualityHash(transParam.ogg320Hash())
                     .songHash(songHash)
                     .level(2)
-                    .bitrate(320)
+                    .qualityVersion("ogg320")
                     .filesize(transParam.ogg320Filesize())
                     .privilege(privilege)
-                    .build();
-            addWhenNull(qualityIds, songQuality, qualities);
+                    .build());
         }
 
         return qualities;
     }
 
-    private void addWhenNull(Set<SongQualityId> qualityIds, SongQuality songQuality, List<SongQuality> qualities) {
-        if (!qualityIds.contains(songQuality.getId())) {
-            qualities.add(songQuality);
-        } else {
-            log.error("Duplicate SongQualityId: {}", songQuality.getId());
-        }
-    }
 
     /**
      * 批量转换: List<SongItem> → List<SongQuality>（所有歌曲的所有音质版本）

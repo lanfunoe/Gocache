@@ -162,27 +162,34 @@ public class DatabaseInitializationService {
                         quality_hash TEXT NOT NULL,
                         song_hash TEXT NOT NULL,
                         level INTEGER,
-                        bitrate INTEGER,
+                        quality_version TEXT,
                         filesize BIGINT,
                         privilege INTEGER,
                         extra_info TEXT,
                         created_at TIMESTAMP,
-                        PRIMARY KEY (audio_id, quality_hash, song_hash)
+                        PRIMARY KEY (audio_id, quality_version, song_hash)
                     )
                     """),
 
                 // 7. 歌单标签分类表
                 createTable("""
-                    CREATE TABLE IF NOT EXISTS playlist_tag_category (
+                    CREATE TABLE IF NOT EXISTS tag (
                         tag_id BIGINT PRIMARY KEY NOT NULL,
                         tag_name TEXT NOT NULL,
                         parent_id BIGINT,
-                        sort INTEGER,
                         extra_info TEXT,
-                        row_update_time TEXT,
-                        created_at TIMESTAMP
+                        row_update_time TEXT
                     )
-                    """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_playlist_tag_category_parent ON playlist_tag_category(parent_id)")),
+                    """),
+
+                //  歌单-标签关联表
+                createTable("""
+                    CREATE TABLE IF NOT EXISTS playlist_tag (
+                        global_collection_id TEXT NOT NULL,
+                        tag_id BIGINT NOT NULL,
+                        PRIMARY KEY (global_collection_id, tag_id)
+                    )
+                    """),
 
                 // 8. 歌单表
                 createTable("""
@@ -190,19 +197,13 @@ public class DatabaseInitializationService {
                         global_collection_id TEXT NOT NULL,
                         category_id INTEGER NOT NULL,
                         listid BIGINT,
-                        list_create_listid BIGINT,
                         list_create_userid BIGINT,
                         list_create_username TEXT,
-                        list_create_gid TEXT,
-                        name TEXT,
                         specialname TEXT,
                         pic TEXT,
                         flexible_cover TEXT,
                         intro TEXT,
-                        tags TEXT,
                         count INTEGER,
-                        sort INTEGER,
-                        authors TEXT,
                         publish_date TEXT,
                         extra_info TEXT,
                         PRIMARY KEY (global_collection_id, category_id)
@@ -221,12 +222,11 @@ public class DatabaseInitializationService {
                         global_collection_id TEXT NOT NULL,
                         audio_id BIGINT NOT NULL,
                         song_hash TEXT NOT NULL,
-                        sort INTEGER,
                         add_time TIMESTAMP,
                         extra_info TEXT,
-                        PRIMARY KEY (global_collection_id, audio_id)
+                        PRIMARY KEY (global_collection_id, audio_id, song_hash)
                     )
-                    """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_playlist_song_audio_id ON playlist_song(audio_id)")),
+                    """),
 
                 // 10. 排行榜表
                 createTable("""
@@ -443,7 +443,7 @@ public class DatabaseInitializationService {
                         PRIMARY KEY (album_id, audio_id)
                     )
                     """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_album_song_audio_id ON album_song(audio_id)"))
-        ).then(Mono.fromRunnable(() -> log.info("All 22 database tables created successfully")));
+        ).then(Mono.fromRunnable(() -> log.info("All database tables created successfully")));
     }
 
     /**

@@ -4,8 +4,6 @@ import lombok.Data;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDateTime;
-
 
 
 
@@ -35,12 +33,6 @@ public class Playlist  {
     private Integer listid;
 
     /**
-     * 创建列表ID
-     */
-    @Column("list_create_listid")
-    private Integer listCreateListid;
-
-    /**
      * 创建用户ID
      */
     @Column("list_create_userid")
@@ -51,18 +43,6 @@ public class Playlist  {
      */
     @Column("list_create_username")
     private String listCreateUsername;
-
-    /**
-     * 创建GID
-     */
-    @Column("list_create_gid")
-    private String listCreateGid;
-
-    /**
-     * 歌单名称
-     */
-    @Column("name")
-    private String name;
 
     /**
      * 特殊名称（备用）
@@ -89,28 +69,10 @@ public class Playlist  {
     private String intro;
 
     /**
-     * 标签（JSON数组）
-     */
-    @Column("tags")
-    private String tags;
-
-    /**
      * 歌曲数量
      */
     @Column("count")
     private Integer count;
-
-    /**
-     * 排序
-     */
-    @Column("sort")
-    private Integer sort;
-
-    /**
-     * 作者列表（JSON数组）
-     */
-    @Column("authors")
-    private String authors;
 
     /**
      * 发布日期
