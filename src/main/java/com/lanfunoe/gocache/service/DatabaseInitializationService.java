@@ -25,10 +25,6 @@ public class DatabaseInitializationService {
 
         return initializeNormalizedTables()
                 .doOnSuccess(v -> log.info("Database initialization completed successfully"))
-                .doOnError(e -> {
-                    log.error("Failed to initialize database", e);
-                    // 不抛出异常，允许应用继续运行
-                })
                 .onErrorResume(e -> {
                     log.error("Database initialization failed, continuing anyway", e);
                     return Mono.empty();
@@ -39,8 +35,6 @@ public class DatabaseInitializationService {
      * 初始化规范化数据库表结构
      */
     private Mono<Void> initializeNormalizedTables() {
-        log.info("Creating normalized database tables...");
-
         return Mono.when(
                 // 1. 用户表
                 createTable("""
@@ -151,7 +145,8 @@ public class DatabaseInitializationService {
                             createIndex("CREATE INDEX IF NOT EXISTS idx_song_hash ON song(hash)"),
                             createIndex("CREATE INDEX IF NOT EXISTS idx_song_name ON song(songname)"),
                             createIndex("CREATE INDEX IF NOT EXISTS idx_song_author ON song(author_name)"),
-                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_album_id ON song(album_id)")
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_album_id ON song(album_id)"),
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_composite ON song(audio_id, hash)")
                         )
                     ),
 
@@ -443,7 +438,7 @@ public class DatabaseInitializationService {
                         PRIMARY KEY (album_id, audio_id)
                     )
                     """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_album_song_audio_id ON album_song(audio_id)"))
-        ).then(Mono.fromRunnable(() -> log.info("All database tables created successfully")));
+        );
     }
 
     /**
@@ -453,9 +448,7 @@ public class DatabaseInitializationService {
         return databaseClient.sql(sql)
                 .fetch()
                 .rowsUpdated()
-                .doOnSuccess(count -> log.debug("Table created successfully"))
-                .doOnError(e -> log.warn("Failed to create table (may already exist): {}", e.getMessage()))
-                .onErrorResume(e -> Mono.empty()) // 忽略已存在的表错误
+                .doOnError(e -> log.error("Failed to create table :", e))
                 .then();
     }
 
@@ -466,9 +459,7 @@ public class DatabaseInitializationService {
         return databaseClient.sql(sql)
                 .fetch()
                 .rowsUpdated()
-                .doOnSuccess(count -> log.debug("Index created successfully"))
-                .doOnError(e -> log.warn("Failed to create index (may already exist): {}", e.getMessage()))
-                .onErrorResume(e -> Mono.empty()) // 忽略已存在的索引错误
+                .doOnError(e -> log.error("Failed to create index : ", e))
                 .then();
     }
 }

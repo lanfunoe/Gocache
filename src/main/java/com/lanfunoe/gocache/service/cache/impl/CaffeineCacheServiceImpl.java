@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
-import com.lanfunoe.gocache.service.cache.CacheConfig;
+import com.lanfunoe.gocache.config.CacheConfig;
 import com.lanfunoe.gocache.service.cache.CacheNames;
+import com.lanfunoe.gocache.service.cache.CaffeineConfigManager;
 import com.lanfunoe.gocache.service.cache.ReactiveCacheService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +18,15 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 /**
  * Caffeine内存缓存服务实现
  * 提供高性能的本地缓存，支持响应式编程
+ *
+ * 优化说明: 使用预定义缓存区域替代 ConcurrentHashMap 动态创建
+ * - 所有缓存区域在启动时初始化，避免内存泄漏风险
+ * - 移除动态缓存创建逻辑，提高性能和可靠性
+ * - 支持配置文件覆盖默认缓存配置
  */
 @Slf4j
 @Service
@@ -31,34 +35,49 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
     private final CacheConfig cacheConfig;
     private final ObjectMapper objectMapper;
-//todo 为什么ConcurrentHashMap
-    private final Map<String, AsyncCache<String, Object>> caches = new ConcurrentHashMap<>();
+    private final CaffeineConfigManager caffeineConfigManager;
+
+    // 预定义所有缓存区域，使用不可变 Map 替代 ConcurrentHashMap
+    private Map<String, AsyncCache<String, Object>> caches;
 
     @PostConstruct
     public void init() {
+        Map<String, AsyncCache<String, Object>> cacheMap = new HashMap<>();
 
-        // 初始化预定义的缓存区域
-        initCache(CacheNames.LYRICS, 2000, null, Duration.ofHours(12));
-        initCache(CacheNames.ARTIST_INFO, 1000, Duration.ofHours(168), null);
-        initCache(CacheNames.CATEGORIES, 100, Duration.ofHours(24), null);
-        initCache(CacheNames.EVERYDAY_RECOMMEND, 100, Duration.ofHours(24), null);
-        initCache(CacheNames.SEARCH_HOT, 50, Duration.ofMinutes(30), null);
-        initCache(CacheNames.SEARCH_RESULTS, 1000, Duration.ofMinutes(5), null);
-        initCache(CacheNames.USER_INFO, 500, Duration.ofHours(1), null);
-        initCache(CacheNames.PLAYLIST_DETAIL, 500, Duration.ofHours(2), null);
-        initCache(CacheNames.ARTIST_WORKS, 500, Duration.ofHours(2), null);
-        initCache(CacheNames.IMAGES, 5000, Duration.ofHours(24), null);
-        initCache(CacheNames.SONGS, 1000, Duration.ofHours(24), null);
+        // 初始化所有已知的缓存区域，严格按照 CacheNames 定义
+        cacheMap.put(CacheNames.LYRICS, createCache(2000, null, Duration.ofHours(12)));
+        cacheMap.put(CacheNames.ARTIST_INFO, createCache(1000, Duration.ofHours(168), null));
+        cacheMap.put(CacheNames.CATEGORIES, createCache(100, Duration.ofHours(24), null));
+        cacheMap.put(CacheNames.TAGS, createCache(500, Duration.ofHours(24), null));
+        cacheMap.put(CacheNames.EVERYDAY_RECOMMEND, createCache(100, Duration.ofHours(24), null));
+        cacheMap.put(CacheNames.IMAGES, createCache(5000, Duration.ofHours(24), null));
+        cacheMap.put(CacheNames.SONGS, createCache(1000, Duration.ofHours(24), null));
+        cacheMap.put(CacheNames.SEARCH_HOT, createCache(50, Duration.ofMinutes(30), null));
+        cacheMap.put(CacheNames.SEARCH_RESULTS, createCache(1000, Duration.ofMinutes(5), null));
+        cacheMap.put(CacheNames.USER_INFO, createCache(500, Duration.ofHours(1), null));
+        cacheMap.put(CacheNames.PLAYLIST_DETAIL, createCache(500, Duration.ofHours(2), null));
+        cacheMap.put(CacheNames.ARTIST_WORKS, createCache(500, Duration.ofHours(2), null));
+        cacheMap.put(CacheNames.TOP_PLAYLIST, createCache(1000, Duration.ofMinutes(30), null));
 
         // 从配置文件加载自定义配置覆盖默认值
         cacheConfig.getCaffeine().getSpecs().forEach((name, spec) -> {
-            initCache(name, spec.getMaxSize(), spec.getExpireAfterWrite(), spec.getExpireAfterAccess());
+            if (cacheMap.containsKey(name)) {
+                // 覆盖预定义的缓存配置
+                cacheMap.put(name, createCache(spec.getMaxSize(), spec.getExpireAfterWrite(), spec.getExpireAfterAccess()));
+                log.info("Overriding cache config for {}: maxSize={}, expireAfterWrite={}, expireAfterAccess={}",
+                    name, spec.getMaxSize(), spec.getExpireAfterWrite(), spec.getExpireAfterAccess());
+            } else {
+                log.warn("Unknown cache region in config: {}. Available regions: {}",
+                    name, String.join(", ", cacheMap.keySet()));
+            }
         });
 
+        // 创建不可变视图，防止意外修改
+        this.caches = Map.copyOf(cacheMap);
         log.info("Caffeine cache initialized with {} regions", caches.size());
     }
 
-    private void initCache(String name, int maxSize, Duration expireAfterWrite, Duration expireAfterAccess) {
+    private AsyncCache<String, Object> createCache(int maxSize, Duration expireAfterWrite, Duration expireAfterAccess) {
         Caffeine<Object, Object> builder = Caffeine.newBuilder()
                 .maximumSize(maxSize)
                 .recordStats();
@@ -70,40 +89,13 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
             builder.expireAfterAccess(expireAfterAccess);
         }
 
-        AsyncCache<String, Object> cache = builder.buildAsync();
-        caches.put(name, cache);
-        log.info("Initialized cache region: {} (maxSize={}, expireAfterWrite={}, expireAfterAccess={})",
-                name, maxSize, expireAfterWrite, expireAfterAccess);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> Mono<T> get(String cacheName, String key, Class<T> type, Supplier<Mono<T>> loader) {
-
-        AsyncCache<String, Object> cache = getOrCreateCache(cacheName);
-
-        return Mono.fromFuture(() ->
-                        cache.get(key, (k, executor) ->
-                                loader.get()
-                                        .doOnNext(v -> log.debug("Cache MISS: {}:{}", cacheName, key))
-                                        .map(v -> (Object) v)
-                                        .toFuture()
-                        )
-                ).map(v -> convertValue(v, type))
-                .doOnSubscribe(s -> log.trace("Cache lookup: {}:{}", cacheName, key));
-    }
-
-    @Override
-    public <T> Mono<T> get(String cacheName, String key, Class<T> type, Duration ttl, Supplier<Mono<T>> loader) {
-        // Caffeine不支持单个key的TTL，使用默认行为
-        return get(cacheName, key, type, loader);
+        return builder.buildAsync();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> Mono<T> getIfPresent(String cacheName, String key, Class<T> type) {
-
-        AsyncCache<String, Object> cache = caches.get(cacheName);
+        AsyncCache<String, Object> cache = getCache(cacheName);
         if (cache == null) {
             return Mono.empty();
         }
@@ -115,27 +107,40 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
         return Mono.fromFuture(future)
                 .map(v -> convertValue(v, type))
-                .doOnNext(v -> log.debug("Cache HIT: {}:{}", cacheName, key));
+                .doOnNext(v -> log.info("L1 Cache HIT: {}:{}", cacheName, key));
     }
 
     @Override
-    public <T> Mono<Void> put(String cacheName, String key, T value) {
+    public <T> void put(String cacheName, String key, T value) {
+        // 检查L1缓存开关
+        if (!caffeineConfigManager.isEnabled()) {
+            log.trace("L1 cache disabled, ignoring put for {}:{}", cacheName, key);
+            return;
+        }
 
-        AsyncCache<String, Object> cache = getOrCreateCache(cacheName);
+        AsyncCache<String, Object> cache = getCache(cacheName);
+        if (cache == null) {
+            log.warn("Attempted to put to unknown cache region: {}", cacheName);
+            return;
+        }
+
         cache.put(key, CompletableFuture.completedFuture(value));
-        log.debug("Cache PUT: {}:{}", cacheName, key);
-        return Mono.empty();
+        log.info("Cache PUT: {}:{}", cacheName, key);
     }
 
     @Override
-    public <T> Mono<Void> put(String cacheName, String key, T value, Duration ttl) {
+    public <T> void put(String cacheName, String key, T value, Duration ttl) {
         // Caffeine不支持单个key的TTL，使用默认行为
-        return put(cacheName, key, value);
+        put(cacheName, key, value);
     }
 
     @Override
     public Mono<Void> evict(String cacheName, String key) {
-        AsyncCache<String, Object> cache = caches.get(cacheName);
+        if (!caffeineConfigManager.isEnabled()) {
+            return Mono.empty();
+        }
+
+        AsyncCache<String, Object> cache = getCache(cacheName);
         if (cache != null) {
             cache.synchronous().invalidate(key);
             log.debug("Cache EVICT: {}:{}", cacheName, key);
@@ -145,7 +150,11 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
     @Override
     public Mono<Void> clear(String cacheName) {
-        AsyncCache<String, Object> cache = caches.get(cacheName);
+        if (!caffeineConfigManager.isEnabled()) {
+            return Mono.empty();
+        }
+
+        AsyncCache<String, Object> cache = getCache(cacheName);
         if (cache != null) {
             cache.synchronous().invalidateAll();
             log.info("Cache CLEAR: {}", cacheName);
@@ -155,7 +164,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
     @Override
     public Mono<Boolean> exists(String cacheName, String key) {
-        AsyncCache<String, Object> cache = caches.get(cacheName);
+        AsyncCache<String, Object> cache = getCache(cacheName);
         if (cache == null) {
             return Mono.just(false);
         }
@@ -165,6 +174,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
     @Override
     public Mono<Map<String, Object>> getStats() {
         Map<String, Object> allStats = new HashMap<>();
+        allStats.put("caffeineEnabled", caffeineConfigManager.isEnabled()); // 新增
         caches.forEach((name, cache) -> {
             allStats.put(name, buildStatsMap(cache.synchronous().stats()));
         });
@@ -173,7 +183,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
     @Override
     public Mono<Map<String, Object>> getStats(String cacheName) {
-        AsyncCache<String, Object> cache = caches.get(cacheName);
+        AsyncCache<String, Object> cache = getCache(cacheName);
         if (cache == null) {
             return Mono.just(Map.of("error", "Cache not found: " + cacheName));
         }
@@ -193,23 +203,13 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
         return map;
     }
 
-    private AsyncCache<String, Object> getOrCreateCache(String cacheName) {
-        return caches.computeIfAbsent(cacheName, name -> {
-            CacheConfig.CacheSpec spec = cacheConfig.getCacheSpec(name);
-            Caffeine<Object, Object> builder = Caffeine.newBuilder()
-                    .maximumSize(spec.getMaxSize())
-                    .recordStats();
-
-            if (spec.getExpireAfterWrite() != null) {
-                builder.expireAfterWrite(spec.getExpireAfterWrite());
-            }
-            if (spec.getExpireAfterAccess() != null) {
-                builder.expireAfterAccess(spec.getExpireAfterAccess());
-            }
-
-            log.info("Created new cache region on-demand: {}", name);
-            return builder.buildAsync();
-        });
+    /**
+     * 获取预定义的缓存实例
+     * @param cacheName 缓存区域名称
+     * @return 缓存实例，如果不存在则返回 null
+     */
+    private AsyncCache<String, Object> getCache(String cacheName) {
+        return caches.get(cacheName);
     }
 
     @SuppressWarnings("unchecked")

@@ -1,7 +1,8 @@
 package com.lanfunoe.gocache.controller;
 
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.everyday.EverydayService;
-import com.lanfunoe.gocache.util.CookieUtils;
+import com.lanfunoe.gocache.util.UserSessionExtractor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +38,9 @@ public class EverydayController extends BaseController {
     public Mono<ResponseEntity<Map<String, Object>>> getEverydayRecommend(
             @RequestParam(required = false, defaultValue = "ios") String platform,
             ServerHttpRequest request) {
-        String token = CookieUtils.extractTokenCompatible(request);
-        String userId = CookieUtils.extractUserIdCompatible(request);
-        return handleBoxOperation("获取每日推荐", everydayService.getEverydayRecommend(platform, token, userId), platform);
+        UserSessionContext session = UserSessionExtractor.extract(request);
+        return handleBoxOperation("获取每日推荐",
+                everydayService.getEverydayRecommend(platform, session),
+                platform);
     }
 }

@@ -59,6 +59,9 @@ public final class CacheNames {
     /** 热门歌单 - 30分钟过期 */
     public static final String TOP_PLAYLIST = "top_playlist";
 
+    /** 歌曲URL缓存 - 2小时过期 */
+    public static final String SONG_URL = "song_url";
+
     // ========== 缓存键前缀 ==========
 
     /** 歌词缓存键前缀 */

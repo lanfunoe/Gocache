@@ -4,7 +4,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * 响应式缓存服务接口
@@ -12,30 +11,6 @@ import java.util.function.Supplier;
  */
 public interface ReactiveCacheService {
 
-    /**
-     * 获取缓存，如果不存在则从loader加载并缓存
-     *
-     * @param cacheName 缓存区域名称
-     * @param key       缓存键
-     * @param type      值类型
-     * @param loader    缓存未命中时的数据加载器
-     * @param <T>       值类型
-     * @return 缓存值的Mono
-     */
-    <T> Mono<T> get(String cacheName, String key, Class<T> type, Supplier<Mono<T>> loader);
-
-    /**
-     * 获取缓存，带自定义TTL
-     *
-     * @param cacheName 缓存区域名称
-     * @param key       缓存键
-     * @param type      值类型
-     * @param ttl       过期时间
-     * @param loader    缓存未命中时的数据加载器
-     * @param <T>       值类型
-     * @return 缓存值的Mono
-     */
-    <T> Mono<T> get(String cacheName, String key, Class<T> type, Duration ttl, Supplier<Mono<T>> loader);
 
     /**
      * 直接获取缓存值，不触发加载
@@ -57,7 +32,7 @@ public interface ReactiveCacheService {
      * @param <T>       值类型
      * @return 完成信号
      */
-    <T> Mono<Void> put(String cacheName, String key, T value);
+    <T> void put(String cacheName, String key, T value);
 
     /**
      * 设置缓存，带自定义TTL
@@ -69,7 +44,7 @@ public interface ReactiveCacheService {
      * @param <T>       值类型
      * @return 完成信号
      */
-    <T> Mono<Void> put(String cacheName, String key, T value, Duration ttl);
+    <T> void put(String cacheName, String key, T value, Duration ttl);
 
     /**
      * 删除指定缓存项

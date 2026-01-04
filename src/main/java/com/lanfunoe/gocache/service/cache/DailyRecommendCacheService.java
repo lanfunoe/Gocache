@@ -28,16 +28,25 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-/**
- * 每日推荐缓存服务
- * 负责三级缓存编排（L1 Caffeine → L2 PostgreSQL → API Loader）
- */
 @Slf4j
 @Service
 public class DailyRecommendCacheService {
 
+    /**
+     * 刷新数据库所需的数据持有记录
+     */
+    private record RefreshData(
+        List<DailyRecommend> dailyRecommends,
+        List<Song> songs,
+        List<Album> albums,
+        List<AlbumSong> albumSongs,
+        List<Artist> artists,
+        List<ArtistSong> artistSongs,
+        List<SongQuality> songQualities
+    ) {}
+
     @Resource
-    private ReactiveCacheService caffeineCacheService;
+    private ReactiveCacheService caffeineService;
     @Resource
     private DailyRecommendRepository dailyRecommendRepository;
     @Resource
@@ -64,43 +73,41 @@ public class DailyRecommendCacheService {
      * @return 每日推荐响应
      */
     public Mono<EverydayRecommendResponse> get(String date, String userId, Supplier<Mono<EverydayRecommendResponse>> loader) {
-
+        String cacheKey = userId + ":" + date;
         // L1 缓存检查（存储完整响应）
-        return caffeineCacheService.getIfPresent(CacheNames.EVERYDAY_RECOMMEND, date, EverydayRecommendResponse.class)
-                .switchIfEmpty(Mono.defer(() -> checkL2CacheAndRefresh(date, userId, date, loader)));
+        return caffeineService.getIfPresent(CacheNames.EVERYDAY_RECOMMEND, cacheKey, EverydayRecommendResponse.class)
+                .switchIfEmpty(getFromDb(date, userId, cacheKey).doOnSuccess(response -> caffeineService.put(CacheNames.EVERYDAY_RECOMMEND, cacheKey, response)))
+                .switchIfEmpty(refreshAll(loader, cacheKey, date, userId));
     }
 
-    /**
-     * 检查L2缓存并在未命中时刷新
-     */
-    private Mono<EverydayRecommendResponse> checkL2CacheAndRefresh(String date, String userId, String cacheKey, Supplier<Mono<EverydayRecommendResponse>> loader) {
+
+    private Mono<EverydayRecommendResponse> getFromDb(String date, String userId, String cacheKey) {
         return dailyRecommendRepository.findByUserIdAndRecommendDate(userId, date)
                 .collectList()
-                .flatMap(dailyRecommends -> {
-                    if (dailyRecommends.isEmpty()) {
-                        return Mono.empty();
-                    }
-                    return rebuildResponseFromL2(dailyRecommends, cacheKey, date);
-                })
-                .switchIfEmpty(Mono.defer(() -> refreshCache(loader, cacheKey, date, userId)));
+                .flatMap(dailyRecommends -> buildResponseFromDailyRecommends(dailyRecommends, date, cacheKey))
+                .onErrorResume(e -> {
+                    log.error("Failed to load daily recommendations from database for user {} date {}", userId, date, e);
+                    return Mono.empty();
+                });
     }
 
-    private Mono<EverydayRecommendResponse> rebuildResponseFromL2(List<DailyRecommend> dailyRecommends, String cacheKey, String date) {
+    private Mono<EverydayRecommendResponse> buildResponseFromDailyRecommends(List<DailyRecommend> dailyRecommends, String date, String cacheKey) {
+        if (dailyRecommends.size() != 30) {
+            return Mono.empty();
+        }
         Map<SongHashId, String> songParams = dailyRecommends.stream()
                 .collect(Collectors.toMap(
                         dr -> SongHashId.of(dr.getAudioId(), dr.getSongHash()),
                         DailyRecommend::getOriAudioName
                 ));
-
         return songRepository.findAllByIds(songParams.keySet())
                 .collectList()
                 .flatMap(songs -> {
-                    if (songs == null || songs.size() != songParams.size()) {
+                    if (songs == null || songs.size() != dailyRecommends.size()) {
                         return Mono.empty();
                     }
-                    EverydayRecommendResponse response = buildResponse(songs, songParams, date);
-                    log.info("L2 Cache HIT: {}:{}", CacheNames.EVERYDAY_RECOMMEND, cacheKey);
-                    return refreshL1Cache(cacheKey, response).thenReturn(response);
+                    log.info("Database HIT: {}:{}", CacheNames.EVERYDAY_RECOMMEND, cacheKey);
+                    return Mono.just(buildResponse(songs, songParams, date));
                 });
     }
 
@@ -113,85 +120,55 @@ public class DailyRecommendCacheService {
         return EverydayRecommendResponse.create(date, songItems);
     }
 
-    /**
-     * 从API加载并刷新所有缓存层级
-     */
-    private Mono<EverydayRecommendResponse> refreshCache(Supplier<Mono<EverydayRecommendResponse>> loader, String cacheKey, String date, String userId) {
+    private Mono<EverydayRecommendResponse> refreshAll(Supplier<Mono<EverydayRecommendResponse>> loader, String cacheKey, String date, String userId) {
         return loader.get().flatMap(response -> {
-            // 执行后台缓存和标准化任务，但不阻塞主流程
-            Mono<Void> backgroundTask = Mono.when(
-                            refreshL1Cache(cacheKey, response),
-                            saveToL2Cache(response, date, userId)
-                    )
-                    .subscribeOn(Schedulers.parallel())
-                    .onErrorResume(e -> {
-                        log.error("Failed to refresh everyday recommend cache", e);
-                        return Mono.empty();
-                    });
-
-            backgroundTask.subscribe();
+            caffeineService.put(CacheNames.EVERYDAY_RECOMMEND, cacheKey, response);
+            refreshDatabase(response, date, userId);
             return Mono.just(response);
         });
     }
 
     /**
-     * 刷新L1缓存
+     * 保存到Database缓存（PostgreSQL）
+     * 保存歌曲、专辑、歌手、音质版本等所有关联数据
      */
-    private Mono<Void> refreshL1Cache(String cacheKey, EverydayRecommendResponse response) {
-        return caffeineCacheService.put(CacheNames.EVERYDAY_RECOMMEND, cacheKey, response)
+    private void refreshDatabase(EverydayRecommendResponse response, String date, String userId) {
+        if (response == null || response.songList() == null || response.songList().isEmpty()) {
+            log.warn("Empty everyday recommend response, skip saving to Database");
+        }
+        Mono.fromCallable(() -> prepareRefreshData(response, date, userId))
+                .flatMap(data -> {
+                    log.info("Saving to Database: {}:{}", CacheNames.EVERYDAY_RECOMMEND, date);
+                    return Mono.when(
+                            dailyRecommendRepository.upsert(data.dailyRecommends()),
+                            songRepository.upsert(data.songs()),
+                            albumRepository.upsert(data.albums()),
+                            albumSongRepository.upsert(data.albumSongs()),
+                            artistRepository.upsert(data.artists()),
+                            artistSongRepository.upsert(data.artistSongs()),
+                            songQualityRepository.upsert(data.songQualities())
+                    );
+                })
+                .subscribeOn(Schedulers.parallel())
                 .onErrorResume(e -> {
-                    log.error("Failed to cache everyday recommend to L1", e);
+                    log.error("Failed to save everyday recommend to Database", e);
                     return Mono.empty();
-                });
+                })
+                .subscribe();
     }
 
     /**
-     * 保存到L2缓存（PostgreSQL）
-     * 保存歌曲、专辑、歌手、音质版本等所有关联数据
+     * 准备刷新数据库所需的数据
      */
-    private Mono<Void> saveToL2Cache(EverydayRecommendResponse response, String date, String userId) {
-        if (response == null || response.songList() == null || response.songList().isEmpty()) {
-            log.warn("Empty everyday recommend response, skip saving to L2");
-            return Mono.empty();
-        }
-        return Mono.fromCallable(() -> {
-                    List<DailyRecommend> dailyRecommends = converter.toDailyRecommendList(date, userId, response.songList());
-                    List<Song> songs = converter.toSongList(response.songList());
-                    List<Album> albums = converter.toAlbumList(response.songList());
-                    List<AlbumSong> albumSongs = converter.toAlbumSongList(response.songList());
-                    List<Artist> artists = converter.toArtistList(response.songList());
-                    List<ArtistSong> artistSongs = converter.toAllArtistSongList(response.songList());
-                    List<SongQuality> songQualities = converter.toAllSongQualityList(response.songList());
+    private RefreshData prepareRefreshData(EverydayRecommendResponse response, String date, String userId) {
+        List<DailyRecommend> dailyRecommends = converter.toDailyRecommendList(date, userId, response.songList());
+        List<Song> songs = converter.toSongList(response.songList());
+        List<Album> albums = converter.toAlbumList(response.songList());
+        List<AlbumSong> albumSongs = converter.toAlbumSongList(response.songList());
+        List<Artist> artists = converter.toArtistList(response.songList());
+        List<ArtistSong> artistSongs = converter.toAllArtistSongList(response.songList());
+        List<SongQuality> songQualities = converter.toAllSongQualityList(response.songList());
 
-                    return new Object[]{
-                            dailyRecommends, songs, albums, albumSongs, artists, artistSongs, songQualities
-                    };
-                })
-                .flatMap(data -> {
-                    log.info("Saving to L2 Cache: {}:{}", CacheNames.EVERYDAY_RECOMMEND, date);
-                    List<DailyRecommend> dailyRecommends = (List<DailyRecommend>) ((Object[]) data)[0];
-                    List<Song> songs = (List<Song>) ((Object[]) data)[1];
-                    List<Album> albums = (List<Album>) ((Object[]) data)[2];
-                    List<AlbumSong> albumSongs = (List<AlbumSong>) ((Object[]) data)[3];
-                    List<Artist> artists = (List<Artist>) ((Object[]) data)[4];
-                    List<ArtistSong> artistSongs = (List<ArtistSong>) ((Object[]) data)[5];
-                    List<SongQuality> songQualities = (List<SongQuality>) ((Object[]) data)[6];
-
-                    return Mono.when(
-                            dailyRecommendRepository.upsert(dailyRecommends),
-                            songRepository.upsert(songs),
-                            albumRepository.upsert(albums),
-                            albumSongRepository.upsert(albumSongs),
-                            artistRepository.upsert(artists),
-                            artistSongRepository.upsert(artistSongs),
-                            songQualityRepository.upsert(songQualities)
-                    );
-                })
-//                .subscribeOn(Schedulers.parallel())
-                .onErrorResume(e -> {
-                    log.error("Failed to save everyday recommend to L2", e);
-                    return Mono.empty();
-                })
-                .contextCapture();
+        return new RefreshData(dailyRecommends, songs, albums, albumSongs, artists, artistSongs, songQualities);
     }
 }

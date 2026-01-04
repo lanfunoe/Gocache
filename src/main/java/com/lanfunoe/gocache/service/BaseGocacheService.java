@@ -12,8 +12,7 @@ import java.util.Map;
 @Slf4j
 public abstract class BaseGocacheService {
 
-    protected static final ParameterizedTypeReference<Map<String, Object>> MAP_TYPE_REF =
-            new ParameterizedTypeReference<>() {};
+    protected static final ParameterizedTypeReference<Map<String, Object>> MAP_TYPE_REF = new ParameterizedTypeReference<>() {};
     @Resource
     protected GocacheConfig gocacheConfig;
     @Resource

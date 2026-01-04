@@ -48,10 +48,10 @@ public class SongQuality {
     private Integer level;
 
     /**
-     * 比特率
+     * 音质版本标识符
      */
-    @Column("bitrate")
-    private Integer bitrate;
+    @Column("quality_version")
+    private String qualityVersion;
 
     /**
      * 文件大小（字节）

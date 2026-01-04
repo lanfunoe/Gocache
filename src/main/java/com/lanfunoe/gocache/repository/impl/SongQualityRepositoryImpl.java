@@ -70,9 +70,9 @@ public class SongQualityRepositoryImpl extends AbstractCompositeKeyQuerySupport<
         Integer[] levels = songQualities.stream()
                 .map(SongQuality::getLevel)
                 .toArray(Integer[]::new);
-        Integer[] bitrates = songQualities.stream()
-                .map(SongQuality::getBitrate)
-                .toArray(Integer[]::new);
+        String[] qualityVersions = songQualities.stream()
+                .map(SongQuality::getQualityVersion)
+                .toArray(String[]::new);
         Long[] filesizes = songQualities.stream()
                 .map(SongQuality::getFilesize)
                 .toArray(Long[]::new);
@@ -88,15 +88,15 @@ public class SongQualityRepositoryImpl extends AbstractCompositeKeyQuerySupport<
 
         String sql = """
             INSERT INTO song_quality (audio_id, quality_hash, song_hash, level,
-                                      bitrate, filesize, privilege, extra_info,
+                                      quality_version, filesize, privilege, extra_info,
                                       created_at)
             SELECT * FROM UNNEST($1::bigint[], $2::varchar[], $3::varchar[],
-                                 $4::integer[], $5::integer[], $6::bigint[],
+                                 $4::integer[], $5::varchar[], $6::bigint[],
                                  $7::integer[], $8::varchar[], $9::timestamp[])
-            ON CONFLICT (audio_id, song_hash, quality_hash) DO UPDATE SET
+            ON CONFLICT (audio_id, song_hash, quality_version) DO UPDATE SET
                 song_hash = EXCLUDED.song_hash,
                 level = EXCLUDED.level,
-                bitrate = EXCLUDED.bitrate,
+                quality_version = EXCLUDED.quality_version,
                 filesize = EXCLUDED.filesize,
                 privilege = EXCLUDED.privilege,
                 extra_info = EXCLUDED.extra_info,
@@ -108,12 +108,18 @@ public class SongQualityRepositoryImpl extends AbstractCompositeKeyQuerySupport<
                 .bind("$2", qualityHashes)
                 .bind("$3", songHashes)
                 .bind("$4", levels)
-                .bind("$5", bitrates)
+                .bind("$5", qualityVersions)
                 .bind("$6", filesizes)
                 .bind("$7", privileges)
                 .bind("$8", extraInfos)
                 .bind("$9", createdATs)
                 .fetch()
-                .rowsUpdated();
+                .rowsUpdated()
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
+                .onErrorResume(e -> {
+                    log.error("Failed to upsert:", e);
+                    return Mono.just(0L);
+                })
+                .contextCapture();
     }
 }

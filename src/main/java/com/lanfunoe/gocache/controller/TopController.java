@@ -91,7 +91,15 @@ public class TopController extends BaseController {
      * @return 热门歌单列表
      */
     @GetMapping("/playlist")
-    public Mono<ResponseEntity<Map<String, Object>>> getTopPlaylist(@RequestParam(required = false, defaultValue = "0") Integer category_id, @RequestParam(required = false, defaultValue = "1") Integer page, @RequestParam(required = false, defaultValue = "30") Integer pagesize, @RequestParam(required = false, defaultValue = "1") Integer withtag, @RequestParam(required = false, defaultValue = "1") Integer withsong, @RequestParam(required = false, defaultValue = "1") Integer sort, @RequestParam(required = false, defaultValue = "1") Integer module_id, ServerHttpRequest request) {
+    public Mono<ResponseEntity<Map<String, Object>>> getTopPlaylist(
+            @RequestParam(required = false, defaultValue = "0") Integer category_id,
+            @RequestParam(required = false, defaultValue = "1") Integer page,
+            @RequestParam(required = false, defaultValue = "30") Integer pagesize,
+            @RequestParam(required = false, defaultValue = "1") Integer withtag,
+            @RequestParam(required = false, defaultValue = "1") Integer withsong,
+            @RequestParam(required = false, defaultValue = "1") Integer sort,
+            @RequestParam(required = false, defaultValue = "1") Integer module_id,
+            ServerHttpRequest request) {
 
         String userid = CookieUtils.extractUserIdCompatible(request);
         String token = CookieUtils.extractTokenCompatible(request);

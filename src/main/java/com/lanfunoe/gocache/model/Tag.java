@@ -12,9 +12,9 @@ import org.springframework.data.relational.core.mapping.Table;
 /**
  * 歌单标签分类实体
  */
-@Table("playlist_tag_category")
+@Table("tag")
 @Data
-public class PlaylistTagCategory  {
+public class Tag  {
 
     /**
      * 标签ID（主键）
@@ -22,7 +22,6 @@ public class PlaylistTagCategory  {
     @Id
     @Column("tag_id")
     private Long tagId;
-
     /**
      * 标签名称
      */
@@ -35,15 +34,8 @@ public class PlaylistTagCategory  {
     @Column("parent_id")
     private Long parentId;
 
-    /**
-     * 排序
-     */
-    @Column("sort")
-    private Integer sort;
-
     @Column("row_update_time")
     private String rowUpdateTime;
-
 
     /**
      * 额外信息（JSON格式）

@@ -40,6 +40,12 @@ public class PlaylistTagRepositoryImpl implements PlaylistTagRepositoryCustom {
                 .bind("$1", globalCollectionIds)
                 .bind("$2", tagIds)
                 .fetch()
-                .rowsUpdated();
+                .rowsUpdated()
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
+                .onErrorResume(e -> {
+                    log.error("Failed to upsert:", e);
+                    return Mono.just(0L);
+                })
+                .contextCapture();
     }
 }

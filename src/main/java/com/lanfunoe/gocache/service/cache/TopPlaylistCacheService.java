@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -28,7 +27,7 @@ import java.util.function.Supplier;
 public class TopPlaylistCacheService {
 
     @Resource
-    private ReactiveCacheService caffeineCacheService;
+    private ReactiveCacheService caffeineService;
 
     @Resource
     private PlaylistRepository playlistRepository;
@@ -58,62 +57,31 @@ public class TopPlaylistCacheService {
             Integer sort,
             Integer moduleId,
             Supplier<Mono<TopPlaylistResponse>> loader) {
-        
-        // 生成缓存键（包含所有参数）
         String cacheKey = String.format("category:%d:page:%d:size:%d:tag:%d:song:%d:sort:%d:module:%d",
                 categoryId, page, pageSize, withtag, withsong, sort, moduleId);
 
-
-        // L1 检查（直接缓存 TopPlaylistResponse）
-        return caffeineCacheService.getIfPresent(CacheNames.TOP_PLAYLIST, cacheKey, TopPlaylistResponse.class)
-            .switchIfEmpty(Mono.defer(() ->
-                // L1 未命中，调用 API
-                loader.get()
-                    .flatMap(response -> {
-                        // 异步保存到数据库（后台任务，不阻塞）
-                        saveToDatabase(response.specialList(), categoryId)
-                            .subscribeOn(Schedulers.boundedElastic())
-                            .onErrorResume(e -> {
-                                log.error("Failed to save to database", e);
-                                return Mono.empty();
-                            })
-                            .subscribe();
-
-
-                        // 回填 L1 并返回
-                        return refreshL1Cache(cacheKey, response).thenReturn(response);
-                    })
-            ));
+        return caffeineService.getIfPresent(CacheNames.TOP_PLAYLIST, cacheKey, TopPlaylistResponse.class)
+                .switchIfEmpty(Mono.defer(() ->
+                        // todo:这个 sort 排序未知不可缓存Db
+                        loader.get().flatMap(response -> {
+                            caffeineService.put(CacheNames.TOP_PLAYLIST, cacheKey, response);
+                            refreshDatabase(response.specialList(), categoryId);
+                            return Mono.just(response);
+                        }))
+                );
     }
 
-    /**
-     * 刷新L1缓存
-     */
-    private Mono<Void> refreshL1Cache(String cacheKey, TopPlaylistResponse response) {
-        return caffeineCacheService.put(CacheNames.TOP_PLAYLIST, cacheKey, response, Duration.ofMinutes(30))
-            .onErrorResume(e -> {
-                log.error("Failed to cache to L1: {}", cacheKey, e);
-                return Mono.empty();
-            });
-    }
 
     /**
      * 保存到数据库（playlist 表）
      */
-    private Mono<Void> saveToDatabase(List<TopPlaylistResponse.SpecialList> specialLists, Integer categoryId) {
+    private void refreshDatabase(List<TopPlaylistResponse.SpecialList> specialLists, Integer categoryId) {
         if (specialLists == null || specialLists.isEmpty()) {
             log.warn("Empty special list, skip saving to database");
-            return Mono.empty();
         }
 
-        return Mono.fromCallable(() -> converter.toPlaylistList(specialLists, categoryId))
-                .flatMap(playlists -> playlistRepository.upsert(playlists).then())
-                .subscribeOn(Schedulers.boundedElastic())
-                .onErrorResume(e -> {
-                    log.error("Failed to save to database for category {}", categoryId, e);
-                    return Mono.empty();
-                })
-                .doOnSuccess(v -> log.info("Database save completed for category {}", categoryId))
-                .contextCapture();
+        playlistRepository.upsert(converter.toPlaylistList(specialLists, categoryId))
+                .subscribeOn(Schedulers.parallel())
+                .subscribe();
     }
 }

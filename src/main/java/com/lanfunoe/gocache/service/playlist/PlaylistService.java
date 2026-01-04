@@ -72,13 +72,10 @@ public class PlaylistService extends BaseGocacheService {
         requestData.put("userid", finalUserid);
         requestData.put("token", finalToken);
         requestData.put("total_ver", 0);
-        requestData.put("name", request.name());
         requestData.put("type", request.type());
         requestData.put("source", finalSource);
         requestData.put("is_pri", 0);
         requestData.put("list_create_userid", request.listCreateUserid());
-        requestData.put("list_create_listid", request.listCreateListid());
-        requestData.put("list_create_gid", request.listCreateGid() != null ? request.listCreateGid() : "");
         requestData.put("from_shupinmv", 0);
 
         if (request.type() == 0 && request.isPri() != null) {
@@ -285,13 +282,10 @@ public class PlaylistService extends BaseGocacheService {
      * 创建歌单请求
      */
     public record AddPlaylistRequest(
-            String name,
             Integer type,
             Integer source,
             Integer isPri,
             String listCreateUserid,
-            String listCreateListid,
-            String listCreateGid,
             String userid,
             String token,
             String cookie

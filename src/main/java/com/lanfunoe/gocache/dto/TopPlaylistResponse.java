@@ -2,6 +2,8 @@ package com.lanfunoe.gocache.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * 热门歌单响应DTO
  */
@@ -27,7 +29,7 @@ public record TopPlaylistResponse(
         String singername,
         Integer from,
         String algPath,
-        java.util.List<PlaylistTagCategory> tags,
+        List<PlaylistTagCategory> tags,
         Integer ugcTalentReview,
         Integer type,
         Integer slid,

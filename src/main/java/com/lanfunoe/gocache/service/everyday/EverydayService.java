@@ -3,6 +3,7 @@ package com.lanfunoe.gocache.service.everyday;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.dto.EverydayRecommendResponse;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.service.cache.DailyRecommendCacheService;
 import com.lanfunoe.gocache.service.common.CommonService;
@@ -37,13 +38,11 @@ public class EverydayService extends BaseGocacheService {
      * 获取每日推荐
      *
      * @param platform 平台类型（默认ios）
-     * @param token    用户认证令牌
-     * @param userid   用户ID
      * @return 完整的每日推荐响应（包含元数据和歌曲列表）
      */
-    public Mono<EverydayRecommendResponse> getEverydayRecommend(String platform, String token, String userid) {
+    public Mono<EverydayRecommendResponse> getEverydayRecommend(String platform, UserSessionContext session) {
         String date = DateTimeUtils.formatCurrentDateYMD();
-        return cacheService.get(date, userid, () -> fetchFromApi(platform, token, userid));
+        return cacheService.get(date, session.userId(), () -> fetchFromApi(platform, session.token(), session.userId()));
     }
 
     /**
