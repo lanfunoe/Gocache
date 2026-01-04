@@ -1,12 +1,12 @@
 package com.lanfunoe.gocache.service.data;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.dto.TopPlaylistResponse;
 import com.lanfunoe.gocache.model.Playlist;
-import lombok.RequiredArgsConstructor;
+import com.lanfunoe.gocache.model.PlaylistTag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,10 +17,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class TopPlaylistConverter {
-
-    private final ObjectMapper objectMapper;
 
     /**
      * 将 TopPlaylistResponse.SpecialList 转换为 Playlist 实体
@@ -47,22 +44,8 @@ public class TopPlaylistConverter {
         playlist.setCount(specialList.collectcount() != null ? specialList.collectcount().intValue() : null);
         // sort字段在SpecialList中不存在,跳过
 
-        // 标签转换为JSON数组//todo:
-//        if (specialList.tags() != null && !specialList.tags().isEmpty()) {
-//            try {
-//                String tagsJson = objectMapper.writeValueAsString(specialList.tags());
-//                playlist.setTags(tagsJson);
-//            } catch (JsonProcessingException e) {
-//                log.warn("Failed to serialize tags for playlist: {}", specialList.globalCollectionId(), e);
-//                playlist.setTags("[]");
-//            }
-//        } else {
-//            playlist.setTags("[]");
-//        }
-
         // 发布日期
         playlist.setPublishDate(specialList.publishtime());
-
 
         return playlist;
     }
@@ -81,6 +64,48 @@ public class TopPlaylistConverter {
 
         return specialList.stream()
                 .map(item -> toPlaylist(item, categoryId))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 将 TopPlaylistResponse.SpecialList 转换为 PlaylistTag 实体列表
+     *
+     * @param specialList API返回的歌单项
+     * @return PlaylistTag实体列表
+     */
+    public List<PlaylistTag> toPlaylistTagList(TopPlaylistResponse.SpecialList specialList) {
+        if (specialList.tags() == null || specialList.tags().isEmpty()) {
+            return List.of();
+        }
+
+        List<PlaylistTag> playlistTags = new ArrayList<>();
+        String globalCollectionId = specialList.globalCollectionId();
+
+        for (TopPlaylistResponse.SpecialList.PlaylistTagCategory tag : specialList.tags()) {
+            if (tag.tagId() != null) {
+                PlaylistTag playlistTag = new PlaylistTag();
+                playlistTag.setGlobalCollectionId(globalCollectionId);
+                playlistTag.setTagId(tag.tagId().longValue());
+                playlistTags.add(playlistTag);
+            }
+        }
+
+        return playlistTags;
+    }
+
+    /**
+     * 批量转换为PlaylistTag实体列表
+     *
+     * @param specialList 歌单项列表
+     * @return PlaylistTag实体列表
+     */
+    public List<PlaylistTag> toPlaylistTagList(List<TopPlaylistResponse.SpecialList> specialList) {
+        if (specialList == null || specialList.isEmpty()) {
+            return List.of();
+        }
+
+        return specialList.stream()
+                .flatMap(item -> toPlaylistTagList(item).stream())
                 .collect(Collectors.toList());
     }
 }

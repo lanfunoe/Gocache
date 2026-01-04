@@ -2,6 +2,7 @@ package com.lanfunoe.gocache.service.cache;
 
 import com.lanfunoe.gocache.dto.TopPlaylistResponse;
 import com.lanfunoe.gocache.repository.PlaylistRepository;
+import com.lanfunoe.gocache.repository.PlaylistTagRepository;
 import com.lanfunoe.gocache.service.data.TopPlaylistConverter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,9 @@ public class TopPlaylistCacheService {
 
     @Resource
     private TopPlaylistConverter converter;
+
+    @Resource
+    private PlaylistTagRepository playlistTagRepository;
 
     /**
      * 获取热门歌单（完整缓存逻辑）
@@ -71,17 +75,14 @@ public class TopPlaylistCacheService {
                 );
     }
 
-
-    /**
-     * 保存到数据库（playlist 表）
-     */
     private void refreshDatabase(List<TopPlaylistResponse.SpecialList> specialLists, Integer categoryId) {
         if (specialLists == null || specialLists.isEmpty()) {
             log.warn("Empty special list, skip saving to database");
         }
-
-        playlistRepository.upsert(converter.toPlaylistList(specialLists, categoryId))
-                .subscribeOn(Schedulers.parallel())
-                .subscribe();
+        Mono.when(
+                playlistRepository.upsert(converter.toPlaylistList(specialLists, categoryId)),
+                playlistTagRepository.upsert(converter.toPlaylistTagList(specialLists))
+        ).subscribeOn(Schedulers.parallel())
+        .subscribe();
     }
 }
