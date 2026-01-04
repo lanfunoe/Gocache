@@ -96,6 +96,12 @@ public class ArtistSongRepositoryImpl extends AbstractCompositeKeyQuerySupport<A
                 .bind("$5", extraInfos)
                 .bind("$6", createdATs)
                 .fetch()
-                .rowsUpdated();
+                .rowsUpdated()
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
+                .onErrorResume(e -> {
+                    log.error("Failed to upsert:", e);
+                    return Mono.just(0L);
+                })
+                .contextCapture();
     }
 }

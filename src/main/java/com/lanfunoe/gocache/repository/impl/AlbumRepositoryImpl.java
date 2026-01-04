@@ -92,6 +92,12 @@ public class AlbumRepositoryImpl implements AlbumRepositoryCustom {
                 .bind("$9", createdATs)
                 .bind("$10", updatedATs)
                 .fetch()
-                .rowsUpdated();
+                .rowsUpdated()
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
+                .onErrorResume(e -> {
+                    log.error("Failed to upsert:", e);
+                    return Mono.just(0L);
+                })
+                .contextCapture();
     }
 }

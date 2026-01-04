@@ -108,6 +108,12 @@ public class ArtistRepositoryImpl implements ArtistRepositoryCustom {
                 .bind("$12", createdATs)
                 .bind("$13", updatedATs)
                 .fetch()
-                .rowsUpdated();
+                .rowsUpdated()
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
+                .onErrorResume(e -> {
+                    log.error("Failed to upsert:", e);
+                    return Mono.just(0L);
+                })
+                .contextCapture();
     }
 }
