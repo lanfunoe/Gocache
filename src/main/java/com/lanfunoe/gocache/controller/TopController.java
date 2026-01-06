@@ -1,11 +1,12 @@
 package com.lanfunoe.gocache.controller;
 
 import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.common.CommonService;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
 import com.lanfunoe.gocache.service.top.TopPlaylistService;
-import com.lanfunoe.gocache.util.CookieUtils;
 import com.lanfunoe.gocache.util.SignatureUtils;
+import com.lanfunoe.gocache.util.UserSessionExtractor;
 import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,20 +36,23 @@ public class TopController extends BaseController {
      * 获取推荐卡片
      *
      * @param card_id 卡片ID：1-精选好歌随心听，2-经典怀旧金曲，3-热门好歌精选，4-小众宝藏佳作，6-vip专属推荐
-     * @param userid 用户ID
+     * @param request HTTP请求
      * @return 推荐卡片内容
      */
     @GetMapping("/card")
     public Mono<ResponseEntity<Map<String, Object>>> getTopCard(
             @RequestParam(required = false, defaultValue = "1") Integer card_id,
-            @RequestParam(required = false) String userid) {
+            ServerHttpRequest request) {
+
+        UserSessionContext session = UserSessionExtractor.extract(request);
+        validateUserSession(session);
 
         String fakem = "60f7ebf1f812edbac3c63a7310001701760f";
         long dateTime = System.currentTimeMillis();
 
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("clienttime", dateTime);
-        dataMap.put("userid", userid != null ? userid : 0);
+        dataMap.put("userid", session.userId());
         dataMap.put("key", SignatureUtils.signParamsKey(String.valueOf(dateTime), "1005", "11083"));
         dataMap.put("fakem", fakem);
         dataMap.put("area_code", 1);
@@ -65,7 +69,7 @@ public class TopController extends BaseController {
         // 构建请求头
         Map<String, String> headers = WebClientRequestBuilder.buildHeadersWithRouter("singlecardrec.service.kugou.com");
 
-        PostRequest request = new PostRequest(
+        PostRequest postRequest = new PostRequest(
                 "/singlecardrec.service/v1/single_card_recommend",
                 dataMap,
                 queryParams,
@@ -74,8 +78,8 @@ public class TopController extends BaseController {
         );
 
         return handleOperation("获取推荐卡片",
-            commonService.postWithDefaults(request),
-            card_id, userid);
+            commonService.postWithDefaults(postRequest),
+            card_id, session.userId());
     }
 
     /**
@@ -88,6 +92,7 @@ public class TopController extends BaseController {
      * @param withsong 是否包含歌曲
      * @param sort 排序方式
      * @param module_id 模块ID
+     * @param request HTTP请求
      * @return 热门歌单列表
      */
     @GetMapping("/playlist")
@@ -101,11 +106,11 @@ public class TopController extends BaseController {
             @RequestParam(required = false, defaultValue = "1") Integer module_id,
             ServerHttpRequest request) {
 
-        String userid = CookieUtils.extractUserIdCompatible(request);
-        String token = CookieUtils.extractTokenCompatible(request);
+        UserSessionContext sessionIn = UserSessionExtractor.extract(request);
+        UserSessionContext session = getOrDefaultSession(sessionIn);
 
         return handleBoxOperation("获取热门歌单",
-                topPlaylistService.getTopPlaylist(category_id, page, pagesize, withtag, withsong, sort, module_id, token, userid),
+                topPlaylistService.getTopPlaylist(category_id, page, pagesize, withtag, withsong, sort, module_id, session),
                 category_id, page, pagesize);
     }
 }

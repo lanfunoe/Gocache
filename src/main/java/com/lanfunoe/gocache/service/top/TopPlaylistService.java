@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.dto.TopPlaylistResponse;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.service.cache.TopPlaylistCacheService;
 import com.lanfunoe.gocache.service.common.CommonService;
@@ -52,14 +53,12 @@ public class TopPlaylistService extends BaseGocacheService {
      * @param withsong 是否包含歌曲
      * @param sort 排序方式
      * @param moduleId 模块ID
-     * @param token 用户认证令牌
-     * @param userid 用户ID
      * @return 热门歌单响应
      */
-    public Mono<TopPlaylistResponse> getTopPlaylist(Integer categoryId, Integer page, Integer pageSize, Integer withtag, Integer withsong, Integer sort, Integer moduleId, String token, String userid) {
+    public Mono<TopPlaylistResponse> getTopPlaylist(Integer categoryId, Integer page, Integer pageSize, Integer withtag, Integer withsong, Integer sort, Integer moduleId, UserSessionContext session) {
 
         return cacheService.get(categoryId, page, pageSize, withtag, withsong, sort, moduleId,
-                () -> fetchFromApi(categoryId, page, pageSize, withtag, withsong, sort, moduleId, token, userid));
+                () -> fetchFromApi(categoryId, page, pageSize, withtag, withsong, sort, moduleId, session));
     }
 
     /**
@@ -73,8 +72,7 @@ public class TopPlaylistService extends BaseGocacheService {
             Integer withsong,
             Integer sort,
             Integer moduleId,
-            String token,
-            String userid) {
+            UserSessionContext session) {
 
         long dateTime = System.currentTimeMillis() / 1000;
 
@@ -98,7 +96,7 @@ public class TopPlaylistService extends BaseGocacheService {
         postBody.put("clientver", gocacheConfig.getClientver());
         postBody.put("appid", gocacheConfig.getAppid());
         postBody.put("clienttime", dateTime);
-        postBody.put("userid", Long.parseLong(userid));
+        postBody.put("userid", session.userId());
         postBody.put("module_id", moduleId);
         postBody.put("page", page);
         postBody.put("pagesize", pageSize);
@@ -116,7 +114,7 @@ public class TopPlaylistService extends BaseGocacheService {
 
         PostRequest postRequest = new PostRequest("/v2/special_recommend", postBody, queryParams, headers, "android");
 
-        return commonService.postWithDefaultsAndAuth(postRequest, token, userid)
+        return commonService.postWithDefaultsAndAuth(postRequest, session)
                 .map(response -> {
                     try {
                         return objectMapper.convertValue(response.get("data"), new TypeReference<>() {});
