@@ -39,7 +39,7 @@ public class DatabaseInitializationService {
                 // 1. 用户表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS "user" (
-                        user_id TEXT PRIMARY KEY NOT NULL,
+                        user_id BIGINT PRIMARY KEY NOT NULL,
                         nickname TEXT,
                         bg_pic TEXT,
                         pic TEXT,
@@ -61,7 +61,7 @@ public class DatabaseInitializationService {
                 // 2. 用户VIP信息表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS user_vip (
-                        user_id TEXT NOT NULL,
+                        user_id BIGINT NOT NULL,
                         product_type TEXT NOT NULL,
                         is_vip INTEGER,
                         vip_begin_time TEXT,
@@ -255,7 +255,7 @@ public class DatabaseInitializationService {
                 // 12. 用户关注歌手表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS user_follow_artist (
-                        user_id TEXT NOT NULL,
+                        user_id BIGINT NOT NULL,
                         artist_id BIGINT NOT NULL,
                         source INTEGER,
                         pic TEXT,
@@ -268,7 +268,7 @@ public class DatabaseInitializationService {
                 // 13. 用户听歌记录表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS user_listen_history (
-                        user_id TEXT NOT NULL,
+                        user_id BIGINT NOT NULL,
                         audio_id BIGINT NOT NULL,
                         song_hash TEXT NOT NULL,
                         name TEXT,
@@ -291,7 +291,7 @@ public class DatabaseInitializationService {
                 // 14. 用户云盘歌曲表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS user_cloud_song (
-                        user_id TEXT NOT NULL,
+                        user_id BIGINT NOT NULL,
                         hash TEXT NOT NULL,
                         filename TEXT,
                         name TEXT,
@@ -309,7 +309,7 @@ public class DatabaseInitializationService {
                 // 15. 用户云盘容量信息表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS user_cloud_storage (
-                        user_id TEXT PRIMARY KEY NOT NULL,
+                        user_id BIGINT PRIMARY KEY NOT NULL,
                         max_size BIGINT,
                         used_size BIGINT,
                         availble_size BIGINT,
@@ -362,7 +362,7 @@ public class DatabaseInitializationService {
                 // 18. 每日推荐歌曲表
                 createTable("""
                     CREATE TABLE IF NOT EXISTS daily_recommend (
-                        user_id TEXT NOT NULL,
+                        user_id BIGINT NOT NULL,
                         recommend_date TEXT NOT NULL,
                         song_hash TEXT NOT NULL,
                         audio_id BIGINT,
