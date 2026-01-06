@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -21,11 +20,14 @@ import java.time.LocalDateTime;
 @Table("song_url")
 public class SongUrl {
 
-    @Id
-    private SongUrlId id;
-
     @Column("audio_id")
     private Long audioId;
+
+    @Column("hash")
+    private String hash;
+
+    @Column("quality")
+    private String quality;
 
     @Column("url")
     private String url;

@@ -72,11 +72,7 @@ public final class GocacheConstants {
     // 通用默认值
     public static final int DEFAULT_PAGE = 1;
     public static final int DEFAULT_PAGE_SIZE = 30;
-    public static final long DEFAULT_ALBUM_ID = 0L;
-    public static final long DEFAULT_ALBUM_AUDIO_ID = 0L;
-    public static final long DEFAULT_AUDIO_ID = 0L;
     public static final String DEFAULT_QUALITY = "128";
-    public static final String DEFAULT_SORT = "hot";
 
     // 音质类型
     public static final String MAGIC_PREFIX = "magic_";

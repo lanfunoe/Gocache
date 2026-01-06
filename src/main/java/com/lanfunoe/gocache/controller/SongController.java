@@ -1,6 +1,5 @@
 package com.lanfunoe.gocache.controller;
 
-import com.lanfunoe.gocache.exception.BusinessException;
 import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.music.MusicService;
 import com.lanfunoe.gocache.util.UserSessionExtractor;
@@ -47,19 +46,12 @@ public class SongController extends BaseController {
             @RequestParam(required = false) String quality,
             @RequestParam(required = false, defaultValue = "false") Boolean freePart,
             ServerHttpRequest request) {
-        return handleOperation("获取音乐播放地址",
-                Mono.defer(() -> {
-                    UserSessionContext session = UserSessionExtractor.extract(request);
-
-                    MusicService.SongUrlRequest songUrl = new MusicService.SongUrlRequest(
-                            hash, albumId, albumAudioId, quality, freePart);
-
-                    // 验证必要参数
-                    if (session.token() == null || session.userId() == null) {
-                        return Mono.error(BusinessException.badRequest("缺少token或userid参数"));
-                    }
-                    return musicService.getSongUrl(songUrl, session);
-                }), hash, quality);
+        UserSessionContext session = UserSessionExtractor.extract(request);
+        validateUserSession(session);
+        MusicService.SongUrlRequest songUrl = new MusicService.SongUrlRequest(hash, albumId, albumAudioId, quality, freePart);
+        return handleBoxOperation("获取音乐播放地址",
+                musicService.getSongUrl(songUrl, session),
+                hash, quality);
     }
 
     /**

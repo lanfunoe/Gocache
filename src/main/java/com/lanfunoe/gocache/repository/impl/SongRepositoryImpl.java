@@ -28,8 +28,7 @@ import java.util.stream.StreamSupport;
  */
 @Slf4j
 @Component
-public class SongRepositoryImpl extends AbstractCompositeKeyQuerySupport<Song, SongHashId>
-        implements SongRepositoryCustom {
+public class SongRepositoryImpl extends AbstractCompositeKeyQuerySupport<Song, SongHashId> implements SongRepositoryCustom {
 
     private final DatabaseClient databaseClient;
 
@@ -284,7 +283,13 @@ public class SongRepositoryImpl extends AbstractCompositeKeyQuerySupport<Song, S
                 .bind("$25", createdATs)
                 .bind("$26", updatedATs)
                 .fetch()
-                .rowsUpdated();
+                .rowsUpdated()
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
+                .onErrorResume(e -> {
+                    log.error("Failed to upsert:", e);
+                    return Mono.just(0L);
+                })
+                .contextCapture();
     }
 
 

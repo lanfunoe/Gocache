@@ -1,6 +1,6 @@
 package com.lanfunoe.gocache.service.auth.strategy;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.config.GocacheApiConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.util.WebClientRequestBuilder;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ public class QRAuthStrategy implements AuthStrategy {
             new ParameterizedTypeReference<>() {};
 
     private final WebClientRequestBuilder webClientRequestBuilder;
-    private final GocacheConfig gocacheConfig;
+    private final GocacheApiConfig gocacheApiConfig;
 
     @Override
     public Mono<Map<String, Object>> authenticate(Map<String, Object> params) {
@@ -40,8 +40,8 @@ public class QRAuthStrategy implements AuthStrategy {
 
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("plat", GocacheConstants.PLATFORM_WEB);
-        queryParams.put("appid", gocacheConfig.getAppid());
-        queryParams.put("srcappid", gocacheConfig.getSrcappid());
+        queryParams.put("appid", gocacheApiConfig.getAppid());
+        queryParams.put("srcappid", gocacheApiConfig.getSrcappid());
         queryParams.put("qrcode", key);
 
         return webClientRequestBuilder.sendGetRequestWithDefaults(

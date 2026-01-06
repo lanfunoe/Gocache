@@ -24,7 +24,7 @@ public class User {
      */
     @Id
     @Column("user_id")
-    private String userId;
+    private Long userId;
 
     /**
      * 昵称

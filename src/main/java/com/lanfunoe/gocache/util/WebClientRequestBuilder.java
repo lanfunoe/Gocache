@@ -2,7 +2,7 @@ package com.lanfunoe.gocache.util;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.config.GocacheApiConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.filter.WebClientLoggingFilter;
 import com.lanfunoe.gocache.model.UserSessionContext;
@@ -34,7 +34,7 @@ public class WebClientRequestBuilder {
     private final WebClient.Builder webClientBuilder;
     private final DefaultParamsBuilder defaultParamsBuilder;
     private final ObjectMapper objectMapper;
-    private final GocacheConfig gocacheConfig;
+    private final GocacheApiConfig gocacheApiConfig;
 
     // WebClient 缓存，避免重复创建
     private final Map<String, WebClient> webClientCache = new ConcurrentHashMap<>();
@@ -411,7 +411,7 @@ public class WebClientRequestBuilder {
     private Map<String, String> buildDefaultHeaders(Map<String, Object> queryParams) {
 
         Map<String, String> defaultHeaders = new HashMap<>();
-        defaultHeaders.put("User-Agent", gocacheConfig.getUserAgent());
+        defaultHeaders.put("User-Agent", gocacheApiConfig.getUserAgent());
 
         if (queryParams != null) {
             addHeaderIfPresent(defaultHeaders, queryParams, "dfid");

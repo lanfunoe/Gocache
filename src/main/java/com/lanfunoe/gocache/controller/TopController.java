@@ -1,6 +1,6 @@
 package com.lanfunoe.gocache.controller;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
+
 import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.common.CommonService;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
@@ -28,7 +28,6 @@ import java.util.Map;
 public class TopController extends BaseController {
 
     private final CommonService commonService;
-    private final GocacheConfig gocacheConfig;
     private final TopPlaylistService topPlaylistService;
 
 

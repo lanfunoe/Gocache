@@ -14,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "cache")
+@ConfigurationProperties(prefix = "gocache.cache")
 public class CacheConfig {
 
     /** Caffeine内存缓存配置 */
@@ -127,8 +127,9 @@ public class CacheConfig {
         /** 歌词存储路径 */
         private String lyricsPath = "${user.home}/.gocache/lyrics";
 
-        /** 图片缓存配置 */
-        private ImageConfig image = new ImageConfig();
+        /** 本地服务基础URL，用于替换歌曲URL */
+        private String baseUrl = "http://localhost:6522";
+
 
         /** 最大存储空间(字节) */
         private long maxSize = 10L * 1024 * 1024 * 1024; // 10GB
@@ -150,42 +151,11 @@ public class CacheConfig {
     }
 
     /**
-     * 图片缓存配置
-     */
-    @Data
-    public static class ImageConfig {
-        /**
-         * 是否启用图片缓存与URL改写
-         * - false: 响应中保持上游图片URL，不触发下载
-         * - true: 响应中将图片URL改写为本地 /media/image/{hash}，并异步缓存图片
-         */
-        private boolean enabled = false;
-
-        /**
-         * 图片缓存空间上限(字节)，<=0 时沿用 storage.maxSize
-         */
-        private long maxSize = 0;
-    }
-
-    /**
      * 规范化存储配置
      */
     @Data
     public static class NormalizedConfig {
         /** 是否启用规范化存储 */
         private boolean enabled = true;
-    }
-
-    /**
-     * 获取指定缓存区域的配置，如果不存在则返回默认配置
-     */
-    public CacheSpec getCacheSpec(String cacheName) {
-        CacheSpec spec = caffeine.getSpecs().get(cacheName);
-        if (spec == null) {
-            spec = new CacheSpec();
-            spec.setMaxSize(caffeine.getDefaultMaxSize());
-            spec.setExpireAfterWrite(caffeine.getDefaultExpireAfterWrite());
-        }
-        return spec;
     }
 }

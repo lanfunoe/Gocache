@@ -9,6 +9,6 @@ public interface SongUrlRepositoryCustom {
     /**
      * 批量插入或更新歌曲URL缓存
      */
-    Mono<Void> upsert(List<SongUrl> songUrls);
+    Mono<Long> upsert(List<SongUrl> songUrls);
 
 }

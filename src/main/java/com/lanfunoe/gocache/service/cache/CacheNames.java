@@ -62,29 +62,6 @@ public final class CacheNames {
     /** 歌曲URL缓存 - 2小时过期 */
     public static final String SONG_URL = "song_url";
 
-    // ========== 缓存键前缀 ==========
-
-    /** 歌词缓存键前缀 */
-    public static final String KEY_PREFIX_LYRIC = "lyric:";
-
-    /** 图片缓存键前缀 */
-    public static final String KEY_PREFIX_IMAGE = "img:";
-
-    /** 歌曲缓存键前缀 */
-    public static final String KEY_PREFIX_SONG = "song:";
-
-    /** 歌手缓存键前缀 */
-    public static final String KEY_PREFIX_ARTIST = "artist:";
-
-    /** 搜索缓存键前缀 */
-    public static final String KEY_PREFIX_SEARCH = "search:";
-
-    /** 用户缓存键前缀 */
-    public static final String KEY_PREFIX_USER = "user:";
-
-
-
-    public static final String KEY_PREFIX_TAGS = "tags:";
 
 
 }

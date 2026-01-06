@@ -2,7 +2,7 @@ package com.lanfunoe.gocache.service.top;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.config.GocacheApiConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.dto.TopPlaylistResponse;
 import com.lanfunoe.gocache.model.UserSessionContext;
@@ -38,7 +38,7 @@ public class TopPlaylistService extends BaseGocacheService {
     private TopPlaylistCacheService cacheService;
 
     @Resource
-    private GocacheConfig gocacheConfig;
+    private GocacheApiConfig gocacheApiConfig;
 
     @Resource
     private ObjectMapper objectMapper;
@@ -93,14 +93,14 @@ public class TopPlaylistService extends BaseGocacheService {
         String mid = CryptoUtils.md5(dfid);
         postBody.put("mid", mid);
         postBody.put("platform", "android");
-        postBody.put("clientver", gocacheConfig.getClientver());
-        postBody.put("appid", gocacheConfig.getAppid());
+        postBody.put("clientver", gocacheApiConfig.getClientver());
+        postBody.put("appid", gocacheApiConfig.getAppid());
         postBody.put("clienttime", dateTime);
         postBody.put("userid", session.userId());
         postBody.put("module_id", moduleId);
         postBody.put("page", page);
         postBody.put("pagesize", pageSize);
-        postBody.put("key", SignatureUtils.signParamsKey(String.valueOf(dateTime), String.valueOf(gocacheConfig.getAppid()), gocacheConfig.getClientver()));
+        postBody.put("key", SignatureUtils.signParamsKey(String.valueOf(dateTime), String.valueOf(gocacheApiConfig.getAppid()), gocacheApiConfig.getClientver()));
         postBody.put("special_recommend", specialRecommend);
         postBody.put("req_multi", 1);
         postBody.put("retrun_min", 5);

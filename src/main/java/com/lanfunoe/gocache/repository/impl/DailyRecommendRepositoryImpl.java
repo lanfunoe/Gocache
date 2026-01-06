@@ -60,9 +60,9 @@ public class DailyRecommendRepositoryImpl extends AbstractCompositeKeyQuerySuppo
         }
 
         // 提取字段数组（4个主键 + 3个非主键）
-        String[] userIds = dailyRecommends.stream()
+        Long[] userIds = dailyRecommends.stream()
                 .map(DailyRecommend::getUserId)
-                .toArray(String[]::new);
+                .toArray(Long[]::new);
         String[] recommendDates = dailyRecommends.stream()
                 .map(DailyRecommend::getRecommendDate)
                 .toArray(String[]::new);
@@ -86,7 +86,7 @@ public class DailyRecommendRepositoryImpl extends AbstractCompositeKeyQuerySuppo
             INSERT INTO daily_recommend (user_id, recommend_date, song_hash,
                                         audio_id, ori_audio_name, extra_info,
                                         created_at)
-            SELECT * FROM UNNEST($1::varchar[], $2::varchar[], $3::varchar[],
+            SELECT * FROM UNNEST($1::bigint[], $2::varchar[], $3::varchar[],
                                  $4::bigint[], $5::varchar[], $6::varchar[],
                                  $7::timestamp[])
             ON CONFLICT (user_id, recommend_date, song_hash, audio_id) DO UPDATE SET

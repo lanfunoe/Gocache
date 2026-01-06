@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "gocache.api")
-public class GocacheConfig {
+public class GocacheApiConfig {
 
     private String baseUrl = GocacheConstants.LOGIN_USER_URL;
 
@@ -27,14 +27,29 @@ public class GocacheConfig {
 
     private boolean isLite = false;
 
+    private int pageId;
+
+    private int pid;
+
+    private String pPageId;
+
+    //todo 配置规整 yml 数据库
+
     @PostConstruct
     public void init() {
         isLite = "lite".equals(platform);
-        if (appid == null) {
-            appid = isLite ? GocacheConstants.Lite_APP_ID : GocacheConstants.APP_ID_ANDROID;
-        }
-        if (clientver == null) {
-            clientver = isLite ? GocacheConstants.LITE_CLIENT_VERSION : GocacheConstants.CLIENT_VERSION;
+        if (isLite) {
+            appid = GocacheConstants.Lite_APP_ID;
+            clientver = GocacheConstants.LITE_CLIENT_VERSION;
+            pageId = GocacheConstants.PAGE_ID_LITE;
+            pid = GocacheConstants.PID_LITE;
+            pPageId = GocacheConstants.PPAGE_ID_LITE;
+        } else {
+            appid = GocacheConstants.APP_ID_ANDROID;
+            clientver = GocacheConstants.CLIENT_VERSION;
+            pageId = GocacheConstants.PAGE_ID_MAIN;
+            pid = GocacheConstants.PID_MAIN;
+            pPageId = GocacheConstants.PPAGE_ID_MAIN;
         }
     }
 }

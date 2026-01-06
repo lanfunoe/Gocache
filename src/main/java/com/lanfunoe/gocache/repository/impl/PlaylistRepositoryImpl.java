@@ -123,10 +123,11 @@ public class PlaylistRepositoryImpl extends AbstractCompositeKeyQuerySupport<Pla
                 .bind("$11", extraInfos)
                 .fetch()
                 .rowsUpdated()
-                .doOnNext(rowsUpdated -> log.debug("Upserted {} playlists", rowsUpdated))
+                .doOnSuccess(rowsUpdated -> log.info("Upserted {} rows", rowsUpdated))
                 .onErrorResume(e -> {
-                    log.error("Failed to upsert playlists", e);
+                    log.error("Failed to upsert:", e);
                     return Mono.just(0L);
-                });
+                })
+                .contextCapture();
     }
 }
