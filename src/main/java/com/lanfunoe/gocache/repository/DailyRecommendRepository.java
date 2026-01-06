@@ -18,5 +18,5 @@ public interface DailyRecommendRepository extends R2dbcRepository<DailyRecommend
      * @param recommendDate   推荐日期 (YYYY-MM-DD)
      * @return 每日推荐列表
      */
-    Flux<DailyRecommend> findByUserIdAndRecommendDate(String userId, String recommendDate);
+    Flux<DailyRecommend> findByUserIdAndRecommendDate(Long userId, String recommendDate);
 }

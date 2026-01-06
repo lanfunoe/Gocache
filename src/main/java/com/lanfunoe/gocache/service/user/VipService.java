@@ -1,6 +1,7 @@
 package com.lanfunoe.gocache.service.user;
 
 import com.lanfunoe.gocache.constants.GocacheConstants;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +22,9 @@ public class VipService extends BaseGocacheService {
     /**
      * 获取VIP详情
      *
-     * @param token  用户token
-     * @param userid 用户ID
      * @return VIP详情
      */
-    public Mono<Map<String, Object>> getVipDetail(String token, String userid) {
+    public Mono<Map<String, Object>> getVipDetail(UserSessionContext session) {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("busi_type", "concept");
         return webClientRequestBuilder.sendGetRequestWithDefaultsAndAuth(
@@ -34,8 +33,7 @@ public class VipService extends BaseGocacheService {
                 queryParams,
                 null,
                 "android",
-                token,
-                userid,
+                session,
                 MAP_TYPE_REF
         );
     }
@@ -44,11 +42,9 @@ public class VipService extends BaseGocacheService {
      * 领取每日VIP (一天)
      * 需要登录
      *
-     * @param token  用户token
-     * @param userid 用户ID
      * @return 领取结果
      */
-    public Mono<Map<String, Object>> receiveDayVip(String token, String userid) {
+    public Mono<Map<String, Object>> receiveDayVip(UserSessionContext session) {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("source_id", GocacheConstants.VIP_SOURCE_ID);
         return webClientRequestBuilder.sendPostRequestWithDefaultsAndAuth(
@@ -58,8 +54,7 @@ public class VipService extends BaseGocacheService {
                 queryParams,
                 null,
                 "android",
-                token,
-                userid,
+                session,
                 MAP_TYPE_REF
         );
     }
@@ -68,11 +63,9 @@ public class VipService extends BaseGocacheService {
      * 领取Youth VIP (通过广告)
      * 需要登录
      *
-     * @param token  用户token
-     * @param userid 用户ID
      * @return 领取结果
      */
-    public Mono<Map<String, Object>> receiveYouthVip(String token, String userid) {
+    public Mono<Map<String, Object>> receiveYouthVip(UserSessionContext session) {
         long currentTime = System.currentTimeMillis();
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -87,8 +80,7 @@ public class VipService extends BaseGocacheService {
                 null,
                 null,
                 "android",
-                token,
-                userid,
+                session,
                 MAP_TYPE_REF
         );
     }

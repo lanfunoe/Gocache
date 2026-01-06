@@ -1,6 +1,5 @@
 package com.lanfunoe.gocache.service.everyday;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.dto.EverydayRecommendResponse;
 import com.lanfunoe.gocache.model.UserSessionContext;
@@ -42,13 +41,13 @@ public class EverydayService extends BaseGocacheService {
      */
     public Mono<EverydayRecommendResponse> getEverydayRecommend(String platform, UserSessionContext session) {
         String date = DateTimeUtils.formatCurrentDateYMD();
-        return cacheService.get(date, session.userId(), () -> fetchFromApi(platform, session.token(), session.userId()));
+        return cacheService.get(date, session.userId(), () -> fetchFromApi(platform, session));
     }
 
     /**
      * 从上游API获取数据
      */
-    private Mono<EverydayRecommendResponse> fetchFromApi(String platform, String token, String userid) {
+    private Mono<EverydayRecommendResponse> fetchFromApi(String platform, UserSessionContext session) {
         Map<String, String> headers = new HashMap<>();
         headers.put(HEADER_X_ROUTER, X_ROUTER_EVERYDAY_REC);
 
@@ -57,11 +56,11 @@ public class EverydayService extends BaseGocacheService {
 
         PostRequest request = new PostRequest("/everyday_song_recommend", null, queryParams, headers, null);
 
-        return commonService.postWithDefaultsAndAuth(request, token, userid)
+        return commonService.postWithDefaultsAndAuth(request, session)
                 .map(response -> {
                     try {
                         Object data = response.get("data");
-                        return objectMapper.convertValue(data, new TypeReference<>() {});
+                        return objectMapper.convertValue(data, EverydayRecommendResponse.class);
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to convert API response data to EverydayRecommendResponse", e);
                     }

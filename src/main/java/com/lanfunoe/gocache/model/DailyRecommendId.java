@@ -18,7 +18,7 @@ public class DailyRecommendId implements Serializable {
     /**
      * 用户ID
      */
-    private String userId;
+    private Long userId;
 
     /**
      * 推荐日期（格式: YYYY-MM-DD）
@@ -47,7 +47,7 @@ public class DailyRecommendId implements Serializable {
     /**
      * 创建主键
      */
-    public static DailyRecommendId of(String userId, String recommendDate, String songHash, Long audioId) {
+    public static DailyRecommendId of(Long userId, String recommendDate, String songHash, Long audioId) {
         return new DailyRecommendId(userId, recommendDate, songHash, audioId);
     }
 }

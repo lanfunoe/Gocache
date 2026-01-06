@@ -72,7 +72,7 @@ public class DailyRecommendCacheService {
      * @param loader API加载器（缓存未命中时调用）
      * @return 每日推荐响应
      */
-    public Mono<EverydayRecommendResponse> get(String date, String userId, Supplier<Mono<EverydayRecommendResponse>> loader) {
+    public Mono<EverydayRecommendResponse> get(String date, Long userId, Supplier<Mono<EverydayRecommendResponse>> loader) {
         String cacheKey = userId + ":" + date;
         // L1 缓存检查（存储完整响应）
         return caffeineService.getIfPresent(CacheNames.EVERYDAY_RECOMMEND, cacheKey, EverydayRecommendResponse.class)
@@ -81,7 +81,7 @@ public class DailyRecommendCacheService {
     }
 
 
-    private Mono<EverydayRecommendResponse> getFromDb(String date, String userId, String cacheKey) {
+    private Mono<EverydayRecommendResponse> getFromDb(String date, Long userId, String cacheKey) {
         return dailyRecommendRepository.findByUserIdAndRecommendDate(userId, date)
                 .collectList()
                 .flatMap(dailyRecommends -> buildResponseFromDailyRecommends(dailyRecommends, date, cacheKey))
@@ -120,7 +120,7 @@ public class DailyRecommendCacheService {
         return EverydayRecommendResponse.create(date, songItems);
     }
 
-    private Mono<EverydayRecommendResponse> refreshAll(Supplier<Mono<EverydayRecommendResponse>> loader, String cacheKey, String date, String userId) {
+    private Mono<EverydayRecommendResponse> refreshAll(Supplier<Mono<EverydayRecommendResponse>> loader, String cacheKey, String date, Long userId) {
         return loader.get().flatMap(response -> {
             caffeineService.put(CacheNames.EVERYDAY_RECOMMEND, cacheKey, response);
             refreshDatabase(response, date, userId);
@@ -132,7 +132,7 @@ public class DailyRecommendCacheService {
      * 保存到Database缓存（PostgreSQL）
      * 保存歌曲、专辑、歌手、音质版本等所有关联数据
      */
-    private void refreshDatabase(EverydayRecommendResponse response, String date, String userId) {
+    private void refreshDatabase(EverydayRecommendResponse response, String date, Long userId) {
         if (response == null || response.songList() == null || response.songList().isEmpty()) {
             log.warn("Empty everyday recommend response, skip saving to Database");
         }
@@ -160,7 +160,7 @@ public class DailyRecommendCacheService {
     /**
      * 准备刷新数据库所需的数据
      */
-    private RefreshData prepareRefreshData(EverydayRecommendResponse response, String date, String userId) {
+    private RefreshData prepareRefreshData(EverydayRecommendResponse response, String date, Long userId) {
         List<DailyRecommend> dailyRecommends = converter.toDailyRecommendList(date, userId, response.songList());
         List<Song> songs = converter.toSongList(response.songList());
         List<Album> albums = converter.toAlbumList(response.songList());

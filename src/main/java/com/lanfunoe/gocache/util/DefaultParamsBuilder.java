@@ -1,6 +1,7 @@
 package com.lanfunoe.gocache.util;
 
 import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -38,19 +39,17 @@ public class DefaultParamsBuilder {
     /**
      * 构建带用户认证信息的默认参数
      *
-     * @param token 用户token
-     * @param userid 用户ID
      * @return 包含用户信息的默认参数Map
      */
-    public Map<String, Object> buildDefaultParamsWithAuth(String token, String userid) {
+    public Map<String, Object> buildDefaultParamsWithAuth(UserSessionContext session) {
         Map<String, Object> params = buildDefaultParams();
 
-        if (StringUtils.isNotEmpty(token)) {
-            params.put("token", token);
+        if (StringUtils.isNotEmpty(session.token())) {
+            params.put("token", session.token());
         }
 
-        if (StringUtils.isNotEmpty(userid)) {
-            params.put("userid", userid);
+        if (session.userId() != null) {
+            params.put("userid", session.userId());
         }
 
         return params;
@@ -81,17 +80,14 @@ public class DefaultParamsBuilder {
      * 将带认证的默认参数合并到现有的参数Map中
      *
      * @param existingParams 现有参数Map
-     * @param token 用户token
-     * @param userid 用户ID
      * @return 合并后的参数Map
      */
-    public Map<String, Object> mergeWithDefaultParamsWithAuth(Map<String, Object> existingParams,
-                                                           String token, String userid) {
+    public Map<String, Object> mergeWithDefaultParamsWithAuth(Map<String, Object> existingParams, UserSessionContext session) {
         if (existingParams == null) {
-            return buildDefaultParamsWithAuth(token, userid);
+            return buildDefaultParamsWithAuth(session);
         }
 
-        Map<String, Object> defaultParams = buildDefaultParamsWithAuth(token, userid);
+        Map<String, Object> defaultParams = buildDefaultParamsWithAuth(session);
         Map<String, Object> mergedParams = new HashMap<>(defaultParams);
 
         // 现有参数优先，覆盖默认参数

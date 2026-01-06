@@ -133,15 +133,12 @@ public class CookieUtils {
      * @return token值
      */
     public static String extractTokenCompatible(ServerHttpRequest request) {
-        // 先从Cookie中提取
-        String cookieToken = extractToken(request);
-        if (cookieToken != null) {
-            return cookieToken;
-        }
-        String token = extractTokenFromAuthorization(request);
+        String token = extractToken(request);
+        if (token == null) {
+            token = extractTokenFromAuthorization(request);
 
-        // 如果Cookie中没有，尝试从Authorization头中提取
-        return token == null ? "" : token;
+        }
+        return token;
     }
 
     /**
@@ -151,13 +148,10 @@ public class CookieUtils {
      * @return userid值
      */
     public static String extractUserIdCompatible(ServerHttpRequest request) {
-        // 先从Cookie中提取
-        String cookieUserid = extractUserId(request);
-        if (cookieUserid != null) {
-            return cookieUserid;
+        String userId = extractUserId(request);
+        if (userId == null) {
+            userId = extractUserIdFromAuthorization(request);
         }
-        String userId = extractUserIdFromAuthorization(request);
-        // 如果Cookie中没有，尝试从Authorization头中提取
-        return userId == null ? "0" : userId;
+        return userId;
     }
 }

@@ -19,7 +19,8 @@ public final class UserSessionExtractor {
             return new UserSessionContext(null, null);
         }
         String token = CookieUtils.extractTokenCompatible(request);
-        String userId = CookieUtils.extractUserIdCompatible(request);
-        return new UserSessionContext(StringUtils.trimToNull(userId), StringUtils.trimToNull(token));
+        String userIdStr = CookieUtils.extractUserIdCompatible(request);
+        Long userId = userIdStr == null ? null : Long.parseLong(userIdStr);
+        return new UserSessionContext(userId, StringUtils.trimToNull(token));
     }
 }

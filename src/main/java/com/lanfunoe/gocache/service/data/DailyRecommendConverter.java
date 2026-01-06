@@ -30,7 +30,7 @@ public class DailyRecommendConverter {
     /**
      * SongItem → DailyRecommend Entity
      */
-    public DailyRecommend toDailyRecommend(String date, String userId, EverydayRecommendResponse.SongItem item) {
+    public DailyRecommend toDailyRecommend(String date, Long userId, EverydayRecommendResponse.SongItem item) {
         if (item == null) {
             return null;
         }
@@ -81,7 +81,7 @@ public class DailyRecommendConverter {
     /**
      * 批量转换: List<SongItem> → List<DailyRecommend>
      */
-    public List<DailyRecommend> toDailyRecommendList(String date, String userId, List<EverydayRecommendResponse.SongItem> items) {
+    public List<DailyRecommend> toDailyRecommendList(String date, Long userId, List<EverydayRecommendResponse.SongItem> items) {
         if (items == null || items.isEmpty()) {
             return Collections.emptyList();
         }

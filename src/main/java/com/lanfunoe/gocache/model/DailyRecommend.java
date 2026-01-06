@@ -22,7 +22,7 @@ public class DailyRecommend  {
      * 用户ID（复合主键之一）
      */
     @Column("user_id")
-    private String userId;
+    private Long userId;
 
     /**
      * 推荐日期（复合主键之一）格式: YYYY-MM-DD

@@ -1,5 +1,6 @@
 package com.lanfunoe.gocache.service.common;
 
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.service.common.request.GetRequest;
 import com.lanfunoe.gocache.service.common.request.PostRequest;
@@ -53,7 +54,7 @@ public class CommonService extends BaseGocacheService {
     /**
      * 发送POST请求（带默认参数、用户认证和加密类型）
      */
-    public Mono<Map<String, Object>> postWithDefaultsAndAuth(PostRequest request, String token, String userid) {
+    public Mono<Map<String, Object>> postWithDefaultsAndAuth(PostRequest request, UserSessionContext session) {
         return webClientRequestBuilder.sendPostRequestWithDefaultsAndAuth(
                 webClientRequestBuilder.createDefaultWebClient(),
                 request.getPath(),
@@ -61,8 +62,7 @@ public class CommonService extends BaseGocacheService {
                 request.getQueryParams(),
                 request.getHeaders(),
                 request.getEncryptType(),
-                token,
-                userid,
+                session,
                 MAP_TYPE_REF
         );
     }
@@ -99,15 +99,14 @@ public class CommonService extends BaseGocacheService {
     /**
      * 发送GET请求（带默认参数、用户认证和加密类型）
      */
-    public Mono<Map<String, Object>> getWithDefaultsAndAuth(GetRequest request, String token, String userid) {
+    public Mono<Map<String, Object>> getWithDefaultsAndAuth(GetRequest request, UserSessionContext session) {
         return webClientRequestBuilder.sendGetRequestWithDefaultsAndAuth(
                 webClientRequestBuilder.createDefaultWebClient(),
                 request.getPath(),
                 request.getQueryParams(),
                 request.getHeaders(),
                 request.getEncryptType(),
-                token,
-                userid,
+                session,
                 MAP_TYPE_REF
         );
     }

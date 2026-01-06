@@ -2,6 +2,7 @@ package com.lanfunoe.gocache.util;
 
 import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -76,16 +77,14 @@ public class EncryptionUtils {
     /**
      * 构建用户歌单的加密参数
      *
-     * @param token        用户token
-     * @param userid       用户ID
      * @param page         页码
      * @param pagesize     每页大小
      * @return 加密后的参数Map
      */
-    public Map<String, Object> buildUserPlaylistEncryptedParams(String token, String userid, Integer page, Integer pagesize) {
+    public Map<String, Object> buildUserPlaylistEncryptedParams(UserSessionContext session, Integer page, Integer pagesize) {
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("userid", Long.parseLong(userid));
-        requestBody.put("token", token);
+        requestBody.put("userid", session.userId());
+        requestBody.put("token", session.token());
         requestBody.put("total_ver", GocacheConstants.PLAYLIST_TOTAL_VER);
         requestBody.put("type", GocacheConstants.PLAYLIST_TYPE_USER);
         requestBody.put("page", page != null ? page : GocacheConstants.DEFAULT_PAGE);
@@ -103,7 +102,7 @@ public class EncryptionUtils {
      * @param pagesize     每页大小
      * @return 包含加密数据和密钥的Result对象
      */
-    public CloudEncryptionResult buildUserCloudEncryptedParams(String token, String userid, String dfid,
+    public CloudEncryptionResult buildUserCloudEncryptedParams(String token, Long userid, String dfid,
                                                                Integer page, Integer pagesize) {
         String actualDfid = dfid != null ? dfid : "-";
         String mid = CryptoUtils.md5(actualDfid);

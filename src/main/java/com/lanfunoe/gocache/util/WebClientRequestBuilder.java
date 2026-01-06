@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.config.GocacheConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.filter.WebClientLoggingFilter;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -143,9 +144,9 @@ public class WebClientRequestBuilder {
                                                          Map<String, Object> queryParams,
                                                          Map<String, String> headers,
                                                          String encryptType,
-                                                         String token, String userid,
+                                                         UserSessionContext session,
                                                          ParameterizedTypeReference<T> typeReference) {
-        Map<String, Object> mergedParams = defaultParamsBuilder.mergeWithDefaultParamsWithAuth(queryParams, token, userid);
+        Map<String, Object> mergedParams = defaultParamsBuilder.mergeWithDefaultParamsWithAuth(queryParams, session);
         Map<String, Object> signedParams = applySignature(mergedParams, encryptType);
 
         var requestBuilder = webClient.get()
@@ -237,9 +238,9 @@ public class WebClientRequestBuilder {
                                                           Map<String, Object> queryParams,
                                                           Map<String, String> headers,
                                                           String encryptType,
-                                                          String token, String userid,
+                                                          UserSessionContext session,
                                                           ParameterizedTypeReference<T> typeReference) {
-        Map<String, Object> mergedParams = defaultParamsBuilder.mergeWithDefaultParamsWithAuth(queryParams, token, userid);
+        Map<String, Object> mergedParams = defaultParamsBuilder.mergeWithDefaultParamsWithAuth(queryParams, session);
         Map<String, Object> signedParams = applySignature(mergedParams, encryptType, body);
 
         var requestBuilder = webClient.post()
