@@ -437,7 +437,17 @@ public class DatabaseInitializationService {
                         created_at TIMESTAMP,
                         PRIMARY KEY (album_id, audio_id)
                     )
-                    """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_album_song_audio_id ON album_song(audio_id)"))
+                    """).then(createIndex("CREATE INDEX IF NOT EXISTS idx_album_song_audio_id ON album_song(audio_id)")),
+
+                // 23. 系统配置表
+                createTable("""
+                    CREATE TABLE IF NOT EXISTS system_config (
+                        config_key TEXT PRIMARY KEY NOT NULL,
+                        config_value TEXT,
+                        description TEXT,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """)
         );
     }
 

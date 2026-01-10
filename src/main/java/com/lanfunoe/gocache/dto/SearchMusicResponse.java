@@ -1,5 +1,8 @@
 package com.lanfunoe.gocache.dto;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 搜索音乐响应DTO
  */
@@ -10,11 +13,11 @@ public record SearchMusicResponse(
     Integer correctiontype,
     String correctionrelate,
     Integer total,
-    java.util.List<SearchSong> lists,
+    List<SearchSong> lists,
     Integer size,
     Integer allowerr,
     String algPath,
-    java.util.List<?> secAggreV2,
+    List<?> secAggreV2,
     Integer correctionforce,
     Integer istag,
     Integer from,
@@ -45,7 +48,7 @@ public record SearchMusicResponse(
         Integer isOriginal,
         String fileHash,
         Integer foldType,
-        java.util.List<?> grp,
+        List<?> grp,
         Integer isPrepublish,
         String type,
         Integer bitrate,
@@ -54,7 +57,7 @@ public record SearchMusicResponse(
         Integer albumPrivilege,
         String albumId,
         String albumName,
-        java.util.List<MvData> mvdata,
+        List<MvData> mvdata,
         String otherName,
         Res res,
         Integer sourceId,
@@ -63,11 +66,11 @@ public record SearchMusicResponse(
         String suffix,
         Integer matchFlag,
         Long scid,
-        java.util.List<Artist> singers,
+        List<Artist> singers,
         String auxiliary,
         Integer rankId,
         String publishDate,
-        java.util.List<?> tagDetails,
+        List<?> tagDetails,
         String tagContent,
         PrepublishInfo prepublishInfo,
         Integer ownerCount,
@@ -105,14 +108,14 @@ public record SearchMusicResponse(
             String ogg320Hash,
             Long ogg128Filesize,
             Integer payBlockTpl,
-            java.util.Map<String, Long> classmap,
+            Map<String, Long> classmap,
             String ogg128Hash,
-            java.util.Map<String, Long> ipmap,
+            Map<String, Long> ipmap,
             Long cid,
             String language,
             Long cpyAttr0,
             String hashMultitrack,
-            java.util.Map<String, Object> qualitymap,
+            Map<String, Object> qualitymap,
             Integer musicpackAdvance,
             Integer display,
             Integer displayRate

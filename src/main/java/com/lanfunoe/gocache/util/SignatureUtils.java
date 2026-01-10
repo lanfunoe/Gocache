@@ -2,6 +2,9 @@ package com.lanfunoe.gocache.util;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -60,13 +63,13 @@ public class SignatureUtils {
         String str = "NVPh5oo715z5DIWAeQlhMDsWXXQV4hwt";
 
         // 先拼接所有key=value对
-        java.util.List<String> paramPairs = new java.util.ArrayList<>();
+        List<String> paramPairs = new ArrayList<>();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             paramPairs.add(entry.getKey() + "=" + entry.getValue());
         }
 
         // 然后对拼接后的字符串进行排序
-        java.util.Collections.sort(paramPairs);
+        Collections.sort(paramPairs);
 
         // 最后连接所有参数
         String paramsString = String.join("", paramPairs);

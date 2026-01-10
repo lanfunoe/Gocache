@@ -13,7 +13,7 @@ import java.time.Duration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "gocache.cache.storage")
-public class StorageCacheConfig {
+public class StorageConfig {
 
     /** 是否启用文件存储 */
     private boolean enabled = true;

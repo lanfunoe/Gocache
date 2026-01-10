@@ -1,6 +1,6 @@
 package com.lanfunoe.gocache.util;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.config.GocacheApiConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.model.UserSessionContext;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EncryptionUtils {
 
-    private final GocacheConfig gocacheConfig;
+    private final GocacheApiConfig gocacheApiConfig;
 
     public String encryptRsaNoPaddingClienttimeToken(long clientTimeSeconds, String token) {
         String payload = String.format("{\"clienttime\":%d,\"token\":\"%s\"}", clientTimeSeconds, token);
-        return CryptoUtils.rsaEncryptNoPadding(payload, gocacheConfig.isLite());
+        return CryptoUtils.rsaEncryptNoPadding(payload, gocacheApiConfig.isLite());
     }
 
     /**
@@ -33,7 +33,7 @@ public class EncryptionUtils {
      */
     public String encryptRsaNoPaddingTokenClienttime(long clientTimeSeconds, String token) {
         String payload = String.format("{\"token\":\"%s\",\"clienttime\":%d}", token, clientTimeSeconds);
-        return CryptoUtils.rsaEncryptNoPadding(payload, gocacheConfig.isLite());
+        return CryptoUtils.rsaEncryptNoPadding(payload, gocacheApiConfig.isLite());
     }
 
     /**
@@ -56,7 +56,7 @@ public class EncryptionUtils {
 
         // RSA加密 clienttime_ms 和 key
         String rsaData = String.format("{\"clienttime_ms\":%d,\"key\":\"%s\"}", currentTime, aesKey);
-        String encryptedRsa = CryptoUtils.rsaEncrypt(rsaData, gocacheConfig.isLite());
+        String encryptedRsa = CryptoUtils.rsaEncrypt(rsaData, gocacheApiConfig.isLite());
 
         // 构建请求体
         Map<String, Object> requestBody = new HashMap<>();

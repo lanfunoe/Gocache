@@ -29,7 +29,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.*;
 @EnableTransactionManagement
 public class PostgresConnectionConfig extends AbstractR2dbcConfiguration {
 
-    private final CacheConfig cacheConfig;
+    private final PostgresCacheConfig postgresCacheConfig;
 
     /**
      * 配置R2DBC连接工厂（使用连接池）
@@ -37,8 +37,8 @@ public class PostgresConnectionConfig extends AbstractR2dbcConfiguration {
     @Override
     @Bean
     public ConnectionFactory connectionFactory() {
-        CacheConfig.PostgresConfig postgresConfig = cacheConfig.getPostgresql();
-        CacheConfig.R2dbcPoolConfig poolConfig = postgresConfig.getPool();
+        PostgresCacheConfig postgresConfig = postgresCacheConfig;
+        PostgresCacheConfig.R2dbcPoolConfig poolConfig = postgresCacheConfig.getPool();
 
         // 创建PostgreSQL连接工厂选项
         ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions.builder()

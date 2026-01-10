@@ -1,6 +1,6 @@
 package com.lanfunoe.gocache.util;
 
-import com.lanfunoe.gocache.config.GocacheConfig;
+import com.lanfunoe.gocache.config.GocacheApiConfig;
 import com.lanfunoe.gocache.model.UserSessionContext;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DefaultParamsBuilder {
 
-    private final GocacheConfig gocacheConfig;
+    private final GocacheApiConfig gocacheApiConfig;
 
     /**
      * 构建基础的默认参数集合
@@ -29,8 +29,8 @@ public class DefaultParamsBuilder {
         params.put("dfid", dfid);
         params.put("mid", mid);
         params.put("uuid", uuid);
-        params.put("appid", gocacheConfig.getAppid());
-        params.put("clientver", gocacheConfig.getClientver());
+        params.put("appid", gocacheApiConfig.getAppid());
+        params.put("clientver", gocacheApiConfig.getClientver());
         params.put("clienttime", clienttime);
 
         return params;
