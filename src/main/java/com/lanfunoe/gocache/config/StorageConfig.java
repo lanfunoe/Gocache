@@ -8,7 +8,6 @@ import java.time.Duration;
 
 /**
  * 文件存储缓存配置
- * 从application.yml读取storage相关配置
  */
 @Data
 @Configuration
@@ -25,7 +24,7 @@ public class StorageConfig {
     private String lyricsPath = "${user.home}/.gocache/lyrics";
 
     /** 图片存储路径 */
-    private String imagePath = "${user.home}/.gocache/images";
+    private String imgPath = "${user.home}/.gocache/images";
 
     /** 本地服务基础URL，用于替换歌曲URL */
     private String baseUrl = "http://localhost:6522";

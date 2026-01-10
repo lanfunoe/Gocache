@@ -13,7 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
  * 图片资源实体
  * 统一管理各实体的图片资源
  */
-@Table("image")
+@Table("img")
 @Data
 public class Image {
 

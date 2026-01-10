@@ -2,8 +2,12 @@ package com.lanfunoe.gocache.service.music;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.constants.GocacheConstants;
+import com.lanfunoe.gocache.dto.SongUrlResponse;
 import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
+import com.lanfunoe.gocache.service.cache.SongUrlCacheService;
+import com.lanfunoe.gocache.service.common.CommonService;
+import com.lanfunoe.gocache.service.common.request.GetRequest;
 import com.lanfunoe.gocache.service.music.strategy.UrlStrategy;
 import com.lanfunoe.gocache.util.CryptoUtils;
 import com.lanfunoe.gocache.util.SignatureUtils;
@@ -35,6 +39,10 @@ public class MusicService extends BaseGocacheService {
     private  ObjectMapper objectMapper;
     @Resource
     private  UrlStrategy cloudUrlStrategy;
+    @Resource
+    private  SongUrlCacheService songUrlCacheService;
+    @Resource
+    private  CommonService commonService;
 
 
 
@@ -64,22 +72,32 @@ public class MusicService extends BaseGocacheService {
      * @param session 用户会话（userid/token）
      * @return 播放地址
      */
-    public Mono<Map<String, Object>> getSongUrl(SongUrlRequest request, UserSessionContext session) {
+    public Mono<SongUrlResponse> getSongUrl(SongUrlRequest request, UserSessionContext session) {
+        String hash = request.getHash() != null ? request.getHash() : "";
+        String quality = processQuality(request.getQuality());
+        return songUrlCacheService.get(hash, quality, () -> fetchFromApi(request, session));
+    }
+
+
+    private Mono<SongUrlResponse> fetchFromApi(SongUrlRequest request, UserSessionContext session) {
         SongUrlContext context = buildSongUrlContext(request, session);
         Map<String, Object> queryParams = buildSongUrlQueryParams(context);
         Map<String, String> headers = buildSongUrlHeaders();
 
-        // /song/url 复用默认参数与鉴权参数的合并逻辑，避免重复写 dfid/mid/uuid/appid/clientver/clienttime/userid/token
-        return webClientRequestBuilder.sendGetRequestWithDefaultsAndAuth(
-                webClientRequestBuilder.createDefaultWebClient(),
-                GocacheConstants.PATH_SONG_URL,
-                queryParams,
-                headers,
-                "android",
-                context.token(),
-                context.userId(),
-                MAP_TYPE_REF
+        GetRequest getRequest = new GetRequest(
+            GocacheConstants.PATH_SONG_URL,
+            queryParams,
+            headers
         );
+
+        return commonService.getWithDefaultsAndAuth(getRequest, session)
+            .map(response -> {
+                try {
+                    return objectMapper.convertValue(response, SongUrlResponse.class);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to convert API response to SongUrlResponse", e);
+                }
+            });
     }
 
     /**
@@ -136,8 +154,8 @@ public class MusicService extends BaseGocacheService {
 
         Map<String, Object> requestBody = encryptionUtils.buildMusicPrivilegeEncryptedParams(
                 hashArray, albumIdArray,
-                gocacheConfig.getAppid(),
-                gocacheConfig.getClientver());
+                gocacheApiConfig.getAppid(),
+                gocacheApiConfig.getClientver());
 
         Map<String, String> headers = WebClientRequestBuilder.buildHeadersWithRouter(
                 GocacheConstants.MEDIA_STORE_DOMAIN);
@@ -210,24 +228,14 @@ public class MusicService extends BaseGocacheService {
     }
 
     private SongUrlContext buildSongUrlContext(SongUrlRequest request, UserSessionContext session) {
-        requireNonNull(request, "SongUrlRequest");
-        requireNonNull(session, "UserSessionContext");
-        requireNonNull(session.userId(), "userid");
-        requireNonNull(session.token(), "token");
-
-        boolean isLite = gocacheConfig.isLite();
-
         String hashLower = request.getHash() != null ? request.getHash().toLowerCase() : "";
         String quality = processQuality(request.getQuality());
-
-        long albumId = request.getAlbumId() != null ? Long.parseLong(request.getAlbumId()) : GocacheConstants.DEFAULT_ALBUM_ID;
-        long albumAudioId = request.getAlbumAudioId() != null ? Long.parseLong(request.getAlbumAudioId()) : GocacheConstants.DEFAULT_ALBUM_AUDIO_ID;
-
+        long albumId = request.getAlbumId() != null ? Long.parseLong(request.getAlbumId()) : 0L;
+        long albumAudioId = request.getAlbumAudioId() != null ? Long.parseLong(request.getAlbumAudioId()) : 0L;
         int freePart = (request.getFreePart() != null && request.getFreePart()) ? 1 : 0;
-
         // 默认参数中的 mid 计算方式与 DefaultParamsBuilder 保持一致：dfid 固定为 "-"
         String mid = CryptoUtils.md5("-");
-        String key = SignatureUtils.signKey(hashLower, mid, session.userId(), String.valueOf(gocacheConfig.getAppid()));
+        String key = SignatureUtils.signKey(hashLower, mid, String.valueOf(session.userId()), String.valueOf(gocacheApiConfig.getAppid()));
 
         return new SongUrlContext(
                 hashLower,
@@ -235,9 +243,9 @@ public class MusicService extends BaseGocacheService {
                 albumAudioId,
                 quality,
                 freePart,
-                isLite ? GocacheConstants.PAGE_ID_LITE : GocacheConstants.PAGE_ID_MAIN,
-                isLite ? GocacheConstants.PID_LITE : GocacheConstants.PID_MAIN,
-                isLite ? GocacheConstants.PPAGE_ID_LITE : GocacheConstants.PPAGE_ID_MAIN,
+                gocacheApiConfig.getPageId(),
+                gocacheApiConfig.getPid(),
+                gocacheApiConfig.getPPageId(),
                 session.userId(),
                 session.token(),
                 key
@@ -253,7 +261,7 @@ public class MusicService extends BaseGocacheService {
             int pageId,
             int pid,
             String ppageId,
-            String userId,
+            Long userId,
             String token,
             String key
     ) {

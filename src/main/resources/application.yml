@@ -82,11 +82,6 @@ gocache:
 
     # 文件存储配置
     storage:
-      enabled: true
-      path: ${user.home}/.gocache/media
-      lyrics-path: ${user.home}/.gocache/lyrics
-      base-url: http://localhost:6522
-      max-size: 1073741824000  # 1000GB in bytes
       cleanup-threshold: 0.9
       cleanup-target: 0.7
       download-concurrency: 3

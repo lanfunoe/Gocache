@@ -272,7 +272,7 @@ public class DatabaseInitializationService {
                         audio_id BIGINT NOT NULL,
                         song_hash TEXT NOT NULL,
                         name TEXT,
-                        image TEXT,
+                        img TEXT,
                         singername TEXT,
                         author_name TEXT,
                         duration BIGINT,

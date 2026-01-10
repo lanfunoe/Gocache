@@ -59,8 +59,8 @@ public class AuthService extends BaseGocacheService {
         queryParams.put("appid", appId);
         queryParams.put("type", 1);
         queryParams.put("plat", GocacheConstants.PLATFORM_WEB);
-        queryParams.put("qrcode_txt", String.format(GocacheConstants.DEFAULT_QRCODE_TEXT_TEMPLATE, gocacheConfig.getAppid()));
-        queryParams.put("srcappid", gocacheConfig.getSrcappid());
+        queryParams.put("qrcode_txt", String.format(GocacheConstants.DEFAULT_QRCODE_TEXT_TEMPLATE, gocacheApiConfig.getAppid()));
+        queryParams.put("srcappid", gocacheApiConfig.getSrcappid());
 
         return webClientRequestBuilder.sendGetRequestWithDefaults(
                 webClientRequestBuilder.createWebClient(GocacheConstants.LOGIN_USER_URL),
@@ -114,8 +114,8 @@ public class AuthService extends BaseGocacheService {
 
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("plat", GocacheConstants.PLATFORM_WEB);
-        queryParams.put("appid", gocacheConfig.getAppid());
-        queryParams.put("srcappid", gocacheConfig.getSrcappid());
+        queryParams.put("appid", gocacheApiConfig.getAppid());
+        queryParams.put("srcappid", gocacheApiConfig.getSrcappid());
         queryParams.put("qrcode", key);
 
         return webClientRequestBuilder.sendGetRequestWithDefaults(

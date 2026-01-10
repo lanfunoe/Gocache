@@ -15,13 +15,6 @@ import java.util.function.Supplier;
 
 /**
  * 热门歌单缓存服务
- * 负责L1 Caffeine缓存编排
- *
- * 缓存策略:
- * - L1: Caffeine 30分钟，最大1000条
- * - 缓存键: 包含全部请求参数（category_id, page, pagesize, withtag, withsong, sort, module_id）
- * - 缓存值: TopPlaylistResponse 实体（已分页的完整响应）
- * - 数据持久化: 异步保存到数据库（后台任务，不阻塞响应）
  */
 @Slf4j
 @Service

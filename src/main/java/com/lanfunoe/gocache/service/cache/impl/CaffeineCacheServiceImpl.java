@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
-import com.lanfunoe.gocache.config.CacheConfig;
+import com.lanfunoe.gocache.config.CaffeineCacheConfig;
 import com.lanfunoe.gocache.service.cache.CacheNames;
-import com.lanfunoe.gocache.service.cache.CaffeineConfigManager;
 import com.lanfunoe.gocache.service.cache.ReactiveCacheService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +32,8 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
-    private final CacheConfig cacheConfig;
+    private final CaffeineCacheConfig caffeineCacheConfig;
     private final ObjectMapper objectMapper;
-    private final CaffeineConfigManager caffeineConfigManager;
 
     // 预定义所有缓存区域，使用不可变 Map 替代 ConcurrentHashMap
     private Map<String, AsyncCache<String, Object>> caches;
@@ -60,7 +58,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
         cacheMap.put(CacheNames.TOP_PLAYLIST, createCache(1000, Duration.ofMinutes(30), null));
 
         // 从配置文件加载自定义配置覆盖默认值
-        cacheConfig.getCaffeine().getSpecs().forEach((name, spec) -> {
+        caffeineCacheConfig.getSpecs().forEach((name, spec) -> {
             if (cacheMap.containsKey(name)) {
                 // 覆盖预定义的缓存配置
                 cacheMap.put(name, createCache(spec.getMaxSize(), spec.getExpireAfterWrite(), spec.getExpireAfterAccess()));
@@ -113,7 +111,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
     @Override
     public <T> void put(String cacheName, String key, T value) {
         // 检查L1缓存开关
-        if (!caffeineConfigManager.isEnabled()) {
+        if (!caffeineCacheConfig.isEnabled()) {
             log.trace("L1 cache disabled, ignoring put for {}:{}", cacheName, key);
             return;
         }
@@ -136,7 +134,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
     @Override
     public Mono<Void> evict(String cacheName, String key) {
-        if (!caffeineConfigManager.isEnabled()) {
+        if (!caffeineCacheConfig.isEnabled()) {
             return Mono.empty();
         }
 
@@ -150,7 +148,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
 
     @Override
     public Mono<Void> clear(String cacheName) {
-        if (!caffeineConfigManager.isEnabled()) {
+        if (!caffeineCacheConfig.isEnabled()) {
             return Mono.empty();
         }
 
@@ -174,7 +172,7 @@ public class CaffeineCacheServiceImpl implements ReactiveCacheService {
     @Override
     public Mono<Map<String, Object>> getStats() {
         Map<String, Object> allStats = new HashMap<>();
-        allStats.put("caffeineEnabled", caffeineConfigManager.isEnabled()); // 新增
+        allStats.put("caffeineEnabled", caffeineCacheConfig.isEnabled()); // 新增
         caches.forEach((name, cache) -> {
             allStats.put(name, buildStatsMap(cache.synchronous().stats()));
         });

@@ -1,13 +1,14 @@
 package com.lanfunoe.gocache.controller;
 
 import com.lanfunoe.gocache.exception.BusinessException;
-import com.lanfunoe.gocache.util.CookieUtils;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.artist.ArtistService;
+import com.lanfunoe.gocache.util.CookieUtils;
+import com.lanfunoe.gocache.util.UserSessionExtractor;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,37 +81,29 @@ public class ArtistController extends BaseController {
      * 关注歌手
      *
      * @param id     歌手ID
-     * @param token  用户token
-     * @param userid 用户ID
      * @param request HTTP请求
      * @return 关注结果
      */
     @GetMapping("/follow")
     public Mono<ResponseEntity<Map<String, Object>>> followArtist(
             @RequestParam @NotBlank(message = "歌手ID不能为空") String id,
-            @RequestParam(required = false) String token,
-            @RequestParam(required = false) String userid,
             ServerHttpRequest request) {
 
-        String extractedToken = CookieUtils.extractTokenCompatible(request);
-        String extractedUserid = CookieUtils.extractUserIdCompatible(request);
-
-        String finalToken = StringUtils.isNotBlank(extractedToken) ? extractedToken : token;
-        String finalUserid = StringUtils.isNotBlank(extractedUserid) ? extractedUserid : userid;
+        UserSessionContext session = UserSessionExtractor.extract(request);
 
         return handleOperation("关注歌手",
             Mono.defer(() -> {
                 // 验证必要参数
-                if (finalToken == null || finalUserid == null) {
+                if (session.userId() == null || session.token() == null) {
                     return Mono.error(BusinessException.badRequest("缺少token或userid参数"));
                 }
 
                 ArtistService.ArtistFollowRequest followRequest = new ArtistService.ArtistFollowRequest(
-                        id, finalToken, finalUserid);
+                        id, session.token(), session.userId());
 
                 return artistService.followArtist(followRequest);
             }),
-            id, finalUserid);
+            id, session.userId());
     }
 
     /**
@@ -125,28 +118,22 @@ public class ArtistController extends BaseController {
     @GetMapping("/unfollow")
     public Mono<ResponseEntity<Map<String, Object>>> unfollowArtist(
             @RequestParam @NotBlank(message = "歌手ID不能为空") String id,
-            @RequestParam(required = false) String token,
-            @RequestParam(required = false) String userid,
             ServerHttpRequest request) {
 
-        String extractedToken = CookieUtils.extractTokenCompatible(request);
-        String extractedUserid = CookieUtils.extractUserIdCompatible(request);
-
-        String finalToken = StringUtils.isNotBlank(extractedToken) ? extractedToken : token;
-        String finalUserid = StringUtils.isNotBlank(extractedUserid) ? extractedUserid : userid;
+        UserSessionContext session = UserSessionExtractor.extract(request);
 
         return handleOperation("取消关注歌手",
             Mono.defer(() -> {
                 // 验证必要参数
-                if (finalToken == null || finalUserid == null) {
+                if (session.token() == null || session.userId() == null) {
                     return Mono.error(BusinessException.badRequest("缺少token或userid参数"));
                 }
 
                 ArtistService.ArtistFollowRequest unfollowRequest = new ArtistService.ArtistFollowRequest(
-                        id, finalToken, finalUserid);
+                        id, session.token(), session.userId());
 
                 return artistService.unfollowArtist(unfollowRequest);
             }),
-            id, finalUserid);
+            id, session.userId());
     }
 }
