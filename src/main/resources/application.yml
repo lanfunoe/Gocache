@@ -84,9 +84,30 @@ gocache:
     storage:
       cleanup-threshold: 0.9
       cleanup-target: 0.7
-      download-concurrency: 3
-      download-timeout: 10m
-      download-retries: 3
+      download-concurrency: 50
+      download-timeout: 5m
+      download-retries: 2
+      download-retry-backoff: 1s
+      download-retry-max-backoff: 10s
+      # 下载队列配置
+      queue:
+        min-concurrency: 20
+        max-concurrency: 80
+        cpu-threshold: 0.85
+        memory-threshold: 0.9
+        adjustment-interval: 30s
+        max-buffer-size: 2000
+        max-active-tasks: 10000
+      # 下载连接池配置
+      pool:
+        max-connections: 50
+        connect-timeout: 5000
+        read-timeout: 600
+        write-timeout: 30
+        pending-acquire-timeout: 5000
+        keep-alive: true
+        tcp-no-delay: true
+        compress: true
 
     # 规范化存储配置
     normalized:

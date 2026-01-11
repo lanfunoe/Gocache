@@ -3,23 +3,30 @@ package com.lanfunoe.gocache.util;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.config.GocacheApiConfig;
+import com.lanfunoe.gocache.config.StorageConfig;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.filter.WebClientLoggingFilter;
 import com.lanfunoe.gocache.model.UserSessionContext;
-import lombok.RequiredArgsConstructor;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 
 import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * WebClient请求构建器
@@ -27,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class WebClientRequestBuilder {
 
     private final WebClientLoggingFilter loggingFilter;
@@ -35,9 +41,30 @@ public class WebClientRequestBuilder {
     private final DefaultParamsBuilder defaultParamsBuilder;
     private final ObjectMapper objectMapper;
     private final GocacheApiConfig gocacheApiConfig;
+    private final StorageConfig storageConfig;
 
     // WebClient 缓存，避免重复创建
     private final Map<String, WebClient> webClientCache = new ConcurrentHashMap<>();
+
+    // 下载专用 WebClient 缓存
+    private final Map<String, WebClient> downloadWebClientCache = new ConcurrentHashMap<>();
+
+    // 下载专用连接池
+    private volatile ConnectionProvider downloadConnectionProvider;
+
+    public WebClientRequestBuilder(WebClientLoggingFilter loggingFilter,
+                                   WebClient.Builder webClientBuilder,
+                                   DefaultParamsBuilder defaultParamsBuilder,
+                                   ObjectMapper objectMapper,
+                                   GocacheApiConfig gocacheApiConfig,
+                                   StorageConfig storageConfig) {
+        this.loggingFilter = loggingFilter;
+        this.webClientBuilder = webClientBuilder;
+        this.defaultParamsBuilder = defaultParamsBuilder;
+        this.objectMapper = objectMapper;
+        this.gocacheApiConfig = gocacheApiConfig;
+        this.storageConfig = storageConfig;
+    }
 
     // ========================= WebClient 创建方法 =========================
 
@@ -59,6 +86,52 @@ public class WebClientRequestBuilder {
      */
     public WebClient createDefaultWebClient() {
         return createWebClient(GocacheConstants.API_GATEWAY_URL);
+    }
+
+    /**
+     * 创建下载专用的WebClient实例
+     * 针对大文件下载场景优化：长超时、连接复用、TCP优化
+     */
+    public WebClient createDownloadWebClient(String baseUrl) {
+        return downloadWebClientCache.computeIfAbsent(baseUrl, url -> {
+            StorageConfig.PoolConfig poolConfig = storageConfig.getPool();
+
+            ConnectionProvider provider = getOrCreateDownloadConnectionProvider(poolConfig);
+
+            HttpClient httpClient = HttpClient.create(provider)
+                    .option(ChannelOption.SO_KEEPALIVE, poolConfig.isKeepAlive())
+                    .option(ChannelOption.TCP_NODELAY, poolConfig.isTcpNoDelay())
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, poolConfig.getConnectTimeout())
+                    .doOnConnected(conn -> {
+                        conn.addHandlerLast(new ReadTimeoutHandler(poolConfig.getReadTimeout(), TimeUnit.SECONDS));
+                        conn.addHandlerLast(new WriteTimeoutHandler(poolConfig.getWriteTimeout(), TimeUnit.SECONDS));
+                    })
+                    .compress(poolConfig.isCompress())
+                    .followRedirect(true);
+
+            return WebClient.builder()
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .baseUrl(url)
+                    .build();
+        });
+    }
+
+    private ConnectionProvider getOrCreateDownloadConnectionProvider(StorageConfig.PoolConfig poolConfig) {
+        if (downloadConnectionProvider == null) {
+            synchronized (this) {
+                if (downloadConnectionProvider == null) {
+                    downloadConnectionProvider = ConnectionProvider.builder("download-pool")
+                            .maxConnections(poolConfig.getMaxConnections())
+                            .pendingAcquireTimeout(Duration.ofMillis(poolConfig.getPendingAcquireTimeout()))
+                            .maxIdleTime(Duration.ofMinutes(5))
+                            .maxLifeTime(Duration.ofMinutes(30))
+                            .evictInBackground(Duration.ofSeconds(30))
+                            .build();
+                    log.info("Download connection pool initialized: maxConnections={}", poolConfig.getMaxConnections());
+                }
+            }
+        }
+        return downloadConnectionProvider;
     }
 
     // ========================= GET请求方法 =========================
