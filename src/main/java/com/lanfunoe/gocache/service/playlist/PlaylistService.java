@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lanfunoe.gocache.constants.GocacheConstants;
 import com.lanfunoe.gocache.dto.TagResponse;
+import com.lanfunoe.gocache.model.UserSessionContext;
 import com.lanfunoe.gocache.service.BaseGocacheService;
 import com.lanfunoe.gocache.service.cache.CombinedCacheService;
 import com.lanfunoe.gocache.service.common.CommonService;
@@ -56,15 +57,15 @@ public class PlaylistService extends BaseGocacheService {
         }
 
         GetRequest getRequest = new GetRequest(GocacheConstants.PATH_GET_OTHER_LIST_FILE_NOFILT, requestData, headers);
-        return commonService.getWithDefaultsAndAuth(getRequest, null, null);
+        return commonService.getWithDefaultsAndAuth(getRequest, new UserSessionContext(0L, ""));
     }
 
     /**
      * 创建歌单
      */
     public Mono<Map<String, Object>> addPlaylist(AddPlaylistRequest request) {
-        String finalUserid = request.userid() != null ? request.userid() : "0";
-        String finalToken = request.token() != null ? request.token() : "";
+        Long finalUserid = request.session.userId();
+        String finalToken = request.session.token();
         Integer finalSource = (request.source() == 0) ? 0 : 1;
         long clienttime = System.currentTimeMillis() / 1000;
 
@@ -91,9 +92,6 @@ public class PlaylistService extends BaseGocacheService {
         }
 
         Map<String, String> headers = new HashMap<>();
-        if (request.cookie() != null) {
-            headers.put("Cookie", request.cookie());
-        }
 
         PostRequest postRequest = new PostRequest(
                 "/cloudlist.service/v5/add_list",
@@ -185,7 +183,7 @@ public class PlaylistService extends BaseGocacheService {
     /**
      * 获取歌单分类标签
      */
-    public Mono<List<TagResponse>> getPlaylistTags(String userId, String token) {
+    public Mono<List<TagResponse>> getPlaylistTags(UserSessionContext session) {
         return cacheService.getAllTags(
                 () -> {
                     // API调用获取原始响应
@@ -200,7 +198,7 @@ public class PlaylistService extends BaseGocacheService {
                             null,
                             "android"
                     );
-                    return commonService.postWithDefaultsAndAuth(postRequest, token, userId).map(response -> {
+                    return commonService.postWithDefaultsAndAuth(postRequest, session).map(response -> {
                         try {
                             Object data = response.get("data");
                             return mapper.convertValue(data, new TypeReference<List<TagResponse>>() {});
@@ -286,9 +284,7 @@ public class PlaylistService extends BaseGocacheService {
             Integer source,
             Integer isPri,
             String listCreateUserid,
-            String userid,
-            String token,
-            String cookie
+            UserSessionContext session
     ) {
         public AddPlaylistRequest {
             type = type != null ? type : 0;

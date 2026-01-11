@@ -404,12 +404,14 @@ public class DatabaseInitializationService {
                         expire_time TIMESTAMP,
                         extra_info TEXT,
                         created_at TIMESTAMP,
+                        is_downloaded BOOLEAN DEFAULT FALSE,
                         PRIMARY KEY (audio_id, hash, quality)
                     )
                     """).then(
                         Mono.when(
                             createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_audio_id ON song_url(audio_id)"),
-                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_expire ON song_url(expire_time)")
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_expire ON song_url(expire_time)"),
+                            createIndex("CREATE INDEX IF NOT EXISTS idx_song_url_downloaded ON song_url(is_downloaded)")
                         )
                     ),
 
