@@ -39,7 +39,7 @@ public class StorageConfig {
     private double cleanupTarget = 0.7;
 
     /** 下载并发数 */
-    private int downloadConcurrency = 3;
+    private int downloadConcurrency = 10;
 
     /** 下载超时时间 */
     private Duration downloadTimeout = Duration.ofMinutes(10);
@@ -58,4 +58,67 @@ public class StorageConfig {
 
     /** 单个文件下载最大大小(字节)，0表示不限制 */
     private long downloadMaxFileSize = 0L;
+
+    /** 下载队列配置 */
+    private QueueConfig queue = new QueueConfig();
+
+    /** 下载连接池配置 */
+    private PoolConfig pool = new PoolConfig();
+
+    /**
+     * 下载队列配置
+     */
+    @Data
+    public static class QueueConfig {
+        /** 最小并发数 */
+        private int minConcurrency = 3;
+
+        /** 最大并发数 */
+        private int maxConcurrency = 80;
+
+        /** CPU使用率阈值(0-1) */
+        private double cpuThreshold = 0.85;
+
+        /** 内存使用率阈值(0-1) */
+        private double memoryThreshold = 0.9;
+
+        /** 并发调整间隔 */
+        private Duration adjustmentInterval = Duration.ofSeconds(30);
+
+        /** 最大缓冲区大小 */
+        private int maxBufferSize = 2000;
+
+        /** 最大活跃任务数 */
+        private int maxActiveTasks = 10000;
+    }
+
+    /**
+     * 下载连接池配置
+     */
+    @Data
+    public static class PoolConfig {
+        /** 最大连接数 */
+        private int maxConnections = 50;
+
+        /** 连接超时(毫秒) */
+        private int connectTimeout = 5000;
+
+        /** 读超时(秒) */
+        private int readTimeout = 600;
+
+        /** 写超时(秒) */
+        private int writeTimeout = 30;
+
+        /** 连接获取超时(毫秒) */
+        private long pendingAcquireTimeout = 5000;
+
+        /** 是否启用Keep-Alive */
+        private boolean keepAlive = true;
+
+        /** 是否启用TCP_NODELAY */
+        private boolean tcpNoDelay = true;
+
+        /** 是否启用压缩 */
+        private boolean compress = true;
+    }
 }
