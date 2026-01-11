@@ -27,10 +27,10 @@ public class StorageConfig {
     private String imgPath = "${user.home}/.gocache/images";
 
     /** 本地服务基础URL，用于替换歌曲URL */
-    private String baseUrl = "http://localhost:6522";
+    private String baseUrl = "http://localhost:" + System.getProperty("server.port");
 
     /** 最大存储空间(字节) */
-    private long maxSize = 10L * 1024 * 1024 * 1024; // 10GB
+    private Long maxSize = 10L * 1024 * 1024 * 1024; // 10GB
 
     /** 触发清理的阈值(0-1) */
     private double cleanupThreshold = 0.9;
@@ -46,4 +46,16 @@ public class StorageConfig {
 
     /** 下载重试次数 */
     private int downloadRetries = 3;
+
+    /** 下载重试退避基准 */
+    private Duration downloadRetryBackoff = Duration.ofSeconds(2);
+
+    /** 下载重试退避上限 */
+    private Duration downloadRetryMaxBackoff = Duration.ofSeconds(30);
+
+    /** 流式下载是否启用 */
+    private boolean downloadStreamingEnabled = true;
+
+    /** 单个文件下载最大大小(字节)，0表示不限制 */
+    private long downloadMaxFileSize = 0L;
 }

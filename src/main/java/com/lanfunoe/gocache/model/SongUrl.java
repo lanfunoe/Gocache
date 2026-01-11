@@ -52,4 +52,7 @@ public class SongUrl {
 
     @Column("created_at")
     private LocalDateTime createdAt;
+
+    @Column("is_downloaded")
+    private Boolean isDownloaded;
 }

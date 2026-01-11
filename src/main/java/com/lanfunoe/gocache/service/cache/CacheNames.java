@@ -16,7 +16,7 @@ public final class CacheNames {
 
     // ========== L1 + L2: 持久化数据缓存 ==========
 
-    /** 歌词缓存 - 通过hash获取，永久有效(LRU淘汰) */
+    /** 歌词缓存 - 通过hash获取，永久有效 */
     public static final String LYRICS = "lyrics";
 
     /** 歌手基本信息 - 7天过期 */
@@ -36,7 +36,7 @@ public final class CacheNames {
     /** 图片文件 - 永久存储 */
     public static final String IMAGES = "images";
 
-    /** 歌曲文件 - 永久存储(LRU淘汰) */
+    /** 歌曲文件 - 永久存储 */
     public static final String SONGS = "songs";
 
     // ========== L1: 仅内存缓存 ==========
