@@ -11,4 +11,8 @@ public interface SongUrlRepositoryCustom {
      */
     Mono<Long> upsert(List<SongUrl> songUrls);
 
+    /**
+     * 标记歌曲URL为已下载
+     */
+    Mono<Void> markAsDownloaded(String hash, String quality, String url);
 }
