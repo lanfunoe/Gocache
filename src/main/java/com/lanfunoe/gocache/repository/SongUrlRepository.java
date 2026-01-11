@@ -8,5 +8,5 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface SongUrlRepository extends R2dbcRepository<SongUrl, Long>, SongUrlRepositoryCustom {
-    Mono<SongUrl> getByHashAndUrl(String hash, String url);
+    Mono<SongUrl> findByHashAndQuality(String hash, String quality);
 }

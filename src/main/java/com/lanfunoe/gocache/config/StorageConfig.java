@@ -90,6 +90,12 @@ public class StorageConfig {
 
         /** 最大活跃任务数 */
         private int maxActiveTasks = 10000;
+
+        /** 任务过期时间，超过此时间的任务将被清理 */
+        private Duration staleTaskTimeout = Duration.ofMinutes(30);
+
+        /** 过期任务清理间隔 */
+        private Duration staleTaskCleanupInterval = Duration.ofMinutes(5);
     }
 
     /**
